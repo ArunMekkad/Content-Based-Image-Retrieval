@@ -67,7 +67,7 @@ int main(int argc, char *argv[]) {
 
     // check for sufficient arguments
     if( argc < 3) {
-        printf("usage: %s <directory path>\n", argv[0]);
+        printf("usage: %s <directory path> <output filename>\n", argv[0]);
         exit(-1);
     }
 

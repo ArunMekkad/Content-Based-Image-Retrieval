@@ -5,14 +5,14 @@
 #include "../include/distance_calculate.h"
 #include <cmath>
 
-typedef float (*DistanceFunction)(std::vector<float>&,std::vector<float>&);
-DistanceFunction select_distance_function(char* metric) {
-    if (metric == "ssd") {
-        return calculate_ssd;
-    } else { // add more function here
-        throw std::invalid_argument("Unknown distance metric: " + metric);
-    }
-}
+//typedef float (*DistanceFunction)(std::vector<float>&,std::vector<float>&);
+//DistanceFunction select_distance_function(char* metric) {
+//    if (metric == "ssd") {
+//        return calculate_ssd;
+//    } else { // add more function here
+//        throw std::invalid_argument("Unknown distance metric: " + metric);
+//    }
+//}
 
 float calculate_ssd(std::vector<float>& v1, std::vector<float>& v2) {
     float distance = 0.0f;
