@@ -4,6 +4,7 @@
 // Spring 2025
 // CPP functions for calculating feature vector of an image
 
+//ARUN IS HERE
 
 #include "../include/feature_calculate.h"
 #include <opencv2/opencv.hpp>
