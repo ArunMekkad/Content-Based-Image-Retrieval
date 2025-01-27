@@ -32,7 +32,6 @@
 - **Example**:
   ```bash
   ../olympus-test/ ../data/feature_vector_1.csv
-  ```# CS5330-25spring-proj2
 #### **Proj2-task1-TopN_finding**
 - **Description**: Calculates and saves the image feature vector into the output file (Task 1).
 - **Usage**:
@@ -42,5 +41,4 @@
 - **Example**:
   ```bash
   ../olympus-test//pic.1016.jpg ../data/feature_vector_1.csv 3
-  ```# CS5330-25spring-proj2
 
