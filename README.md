@@ -23,22 +23,36 @@
 
 
 ### Executables
-#### **Proj2-task1-offline_loading**
-- **Description**: Calculates and saves the image feature vector into the output file (Task 1).
+#### **Proj2-offline_loading**
+
+- **Description**: Calculates and saves the image feature vector into the output file.
 - **Usage**:
   ```bash
-  Proj2-task1-offline_loading [input_dir] [output_filename]
+  Proj2-offline_loading [input_dir] [output_filename][feature type]
+  # feature type option
+  # 1.7x7 square:  1
+  # 2.RGB histogram: 2
   ```
 - **Example**:
   ```bash
-  ../olympus-test/ ../data/feature_vector_1.csv
-#### **Proj2-task1-TopN_finding**
-- **Description**: Calculates and saves the image feature vector into the output file (Task 1).
+  # Task1
+  ../olympus-test/ ../data/feature_vector_1.csv 1
+  # Task2
+  ../olympus-test/ ../data/feature_vector_2.csv 2
+#### **Proj2-TopN_finding**
+
+- **Description**: Calculates and saves the image feature vector into the output file.
 - **Usage**:
   ```bash
-  Proj2-task1-TopN_finding [target_image][feature_file][N]
+  Proj2-TopN_finding [target_image][feature_file][N][distance_metrics]
+  # distance metrics option
+  # 1. sum-of-squared-difference: ssd
+  # 2. RGB histogram: rgb-hist
   ```
 - **Example**:
   ```bash
-  ../olympus-test//pic.1016.jpg ../data/feature_vector_1.csv 3
+  # Task1
+  ../olympus-test/pic.1016.jpg ../data/feature_vector_1.csv 3 ssd
+  # Task2
+  ../olympus-test/pic.0164.jpg ../data/feature_vector_2.csv 3 rgb-hist
 
