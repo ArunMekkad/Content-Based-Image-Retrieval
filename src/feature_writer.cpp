@@ -63,13 +63,37 @@ int main(int argc, char *argv[]) {
     FILE *fp;
     DIR *dirp;
     struct dirent *dp;
-    int i;
 
     // check for sufficient arguments
-    if( argc < 3) {
-        printf("usage: %s <directory path> <output filename>\n", argv[0]);
+    if (argc < 4) {
+        printf("usage: %s <directory path> <output filename> <feature type>\n", argv[0]);
+        printf("Feature types:\n");
+        printf("1: 7x7 square\n");
+        printf("2: RGB histogram\n");
+        // TODO: add more features here
         exit(-1);
     }
+
+    FeatureType feature_type;
+    switch (atoi(argv[3])) {
+        case 1:
+            feature_type = FeatureType::SQUARE_7X7;
+            printf("Using 7x7 square feature\n");
+            break;
+        case 2:
+            feature_type = FeatureType::RGB_HISTOGRAM;
+            printf("Using RGB histogram feature\n");
+            break;
+            // TODO: add more features here
+//        case 3:
+//            feature_type = FeatureType::HSV_HISTOGRAM;
+//            printf("Using HSV histogram feature\n");
+//            break;
+        default:
+            printf("Invalid feature type. Please select 1, 2, or 3\n");
+            exit(-1);
+    }
+
 
     // get the directory path
     strcpy(dirname, argv[1]);
@@ -101,11 +125,10 @@ int main(int argc, char *argv[]) {
 
             // build the overall filename
             strcpy(buffer, dirname);
-            strcat(buffer, "/");
             strcat(buffer, dp->d_name);
 
             printf("full path name: %s\n", buffer);
-            extract_and_save_features(buffer, get7x7square, output_file);
+            extract_and_save_features(buffer, getFeatureFunction(feature_type), output_file);
         }
     }
 
