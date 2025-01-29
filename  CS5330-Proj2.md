@@ -11,9 +11,9 @@ I implemented two programs for image feature matching:
 
 **Result:**
 
-![image-20250128145323783](/Users/yuyangtian/Library/Application Support/typora-user-images/image-20250128145323783.png)
+![image-20250128145323783](/Users/yuyangtian/Documents/NEU/CS5330/Proj2/report-img/task1-terminal.png)
 
-<img src="/Users/yuyangtian/Library/Application Support/typora-user-images/image-20250128145330877.png" alt="image-20250128145330877" style="zoom:50%;" />
+<img src="/Users/yuyangtian/Documents/NEU/CS5330/Proj2/report-img/task1-image.png" alt="image-20250128145330877" style="zoom:50%;" />
 
 #### Task2 - RGB histogram matching
 
@@ -23,9 +23,9 @@ The histogram matching is also implemented in two phrase fashion, similarly:
 
 2. The second program,  `image_matcher.cpp`,  reads the feature vectors from the CSV file and computes the **Histogram intersection ** `calculate_histogramIntersection ` to measure the similarity between images. The distance calculation logic is organized in `distance_calculate.cpp`.
 
-   <img src="/Users/yuyangtian/Library/Application Support/typora-user-images/image-20250128160249621.png" alt="image-20250128160249621" style="zoom:50%;" />
+   <img src="/Users/yuyangtian/Documents/NEU/CS5330/Proj2/report-img/task2-terminal.png" alt="image-20250128160249621" style="zoom:50%;" />
 
-<img src="/Users/yuyangtian/Library/Application Support/typora-user-images/image-20250128160209428.png" alt="image-20250128160209428" style="zoom: 50%;" />
+<img src="/Users/yuyangtian/Documents/NEU/CS5330/Proj2/report-img/task2-image.png" alt="image-20250128160209428" style="zoom: 50%;" />
 
 ### Acknowledgement
 
