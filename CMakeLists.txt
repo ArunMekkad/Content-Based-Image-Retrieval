@@ -1,10 +1,9 @@
-cmake_minimum_required(VERSION 3.26)
+cmake_minimum_required(VERSION 3.0)
 project(Proj2)
 
 set(CMAKE_CXX_STANDARD 14)
 find_package(OpenCV REQUIRED)
 
-include_directories("Project 2 CSV Utility")
 # Function for OpenCV-only executables
 function(add_opencv_executable exe_name)
     add_executable(${exe_name} ${ARGN})
@@ -17,4 +16,11 @@ add_opencv_executable(Proj2-offline_loading
         "../src/feature_calculate.cpp"
         "../src/csv_util.cpp"
 )
+add_opencv_executable(Proj2-TopN_finding
+        "../src/image_matcher.cpp"
+        "../src/distance_calculate.cpp"
+        "../src/csv_util.cpp"
+        "../src/image_display_util.cpp"
+)
+
 
