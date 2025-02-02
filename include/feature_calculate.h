@@ -17,7 +17,7 @@ enum class FeatureType {
     SQUARE_7X7,
     RGB_HISTOGRAM,
   // TODO: Please dd more feature type here, Arun
-    HSV_HISTOGRAM,
+    MULTI_HISTOGRAM
     // Add more feature types as needed
 };
 
@@ -40,5 +40,7 @@ int get7x7square(char *image_filename, std::vector<float> &image_data);
  * @return non-zero failure.
  */
 int calculateRGBHistogram(char *image_filename, std::vector<float>& hist);
+
+int getMultiHistogramFeature(char *image_filename, std::vector<float> &image_data);
 
 #endif //PROJ2_FEATURE_CALCULATE_H

@@ -1,9 +1,13 @@
-//
-// Created by Yuyang Tian on 2025/1/26.
-//
+/*
+ * Authors: Yuyang Tian and Arun Mekkad
+ * Date: January 26, 2025
+ * Purpose: Filter definitions
+ */
 
 #include "../include/distance_calculate.h"
 #include <cmath>
+
+using namespace std;
 
 /**
  * @brief Computes the SSD between two normalized feature vectors.
@@ -43,4 +47,20 @@ float calculate_histogramIntersection(std::vector<float>& hist1, std::vector<flo
     // Since the histograms are normalized, intersection will be between 0 and 1
     // where 1 means identical histograms and 0 means no overlap
     return intersection;
+}
+
+float calculate_multiHist_distance(std::vector<float> &hist1, std::vector<float> &hist2) {
+    // Split concatenated histograms
+    size_t mid = hist1.size()/2;
+    std::vector<float> top1(hist1.begin(), hist1.begin()+mid);
+    std::vector<float> bottom1(hist1.begin()+mid, hist1.end());
+    
+    std::vector<float> top2(hist2.begin(), hist2.begin()+mid);
+    std::vector<float> bottom2(hist2.begin()+mid, hist2.end());
+    
+    // Calculate individual distances
+    float d_top = 1 - calculate_histogramIntersection(top1, top2);
+    float d_bottom = 1 - calculate_histogramIntersection(bottom1, bottom2);
+    
+    return 0.5 * d_top + 0.5 * d_bottom; // Equal weighting
 }

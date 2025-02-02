@@ -4,8 +4,6 @@
 // Spring 2025
 // CPP functions for calculating feature vector of an image
 
-//ARUN IS HERE
-
 #include "../include/feature_calculate.h"
 #include <opencv2/opencv.hpp>
 
@@ -19,9 +17,8 @@ FeatureFunction getFeatureFunction(FeatureType type) {
             return get7x7square;
         case FeatureType::RGB_HISTOGRAM:
             return calculateRGBHistogram;
-            // TODO: Please add more feature type function here
-//        case FeatureType::HSV_HISTOGRAM:
-//            return calculateHSVHistogram;
+        case FeatureType::MULTI_HISTOGRAM:
+            return getMultiHistogramFeature;
         default:
             return nullptr;
     }
@@ -98,5 +95,59 @@ int calculateRGBHistogram(char *image_filename, std::vector<float>& hist) {
         hist[i] /= total_pixels;
     }
     // Success!
+    return 0;
+}
+
+int calculateMultiHistogram(const cv::Mat& image, std::vector<float>& hist, int bins) {
+    const int BIN_SIZE = 256 / bins;
+    
+    // Initialize the histogram
+    hist.clear();
+    hist.resize(bins * bins * bins, 0.0f);
+
+    // Calculate the frequency of each pixel
+    for (int i = 0; i < image.rows; i++) {
+        for (int j = 0; j < image.cols; j++) {
+            cv::Vec3b color = image.at<cv::Vec3b>(i, j);
+            int binB = color[0] / BIN_SIZE;
+            int binG = color[1] / BIN_SIZE;
+            int binR = color[2] / BIN_SIZE;
+            int binIndex = binR * bins * bins + binG * bins + binB;
+            hist[binIndex]++;
+        }
+    }
+
+    // Normalize the frequency
+    float total_pixels = static_cast<float>(image.rows * image.cols);
+    for (float& bin : hist) {
+        bin /= total_pixels;
+    }
+
+    return 0;
+}
+
+int getMultiHistogramFeature(char *image_filename, std::vector<float> &image_data) {
+    int bins = 8;
+    // Read the image
+    cv::Mat image = cv::imread(image_filename);
+    if (image.empty()) {
+        std::cerr << "Error loading image: " << image_filename << std::endl;
+        return -1;
+    }
+    
+    // Split image into top/bottom halves
+    cv::Mat top_half = image(cv::Rect(0, 0, image.cols, image.rows/2));
+    cv::Mat bottom_half = image(cv::Rect(0, image.rows/2, image.cols, image.rows/2));
+    
+    // Calculate histograms for each region
+    std::vector<float> top_hist, bottom_hist;
+    calculateMultiHistogram(top_half, top_hist, bins);
+    calculateMultiHistogram(bottom_half, bottom_hist, bins);
+    
+    // Concatenate histograms
+    image_data.clear();
+    image_data.insert(image_data.end(), top_hist.begin(), top_hist.end());
+    image_data.insert(image_data.end(), bottom_hist.begin(), bottom_hist.end());
+    
     return 0;
 }

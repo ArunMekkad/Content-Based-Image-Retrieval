@@ -22,3 +22,5 @@ float calculate_ssd(std::vector<float>& v1, std::vector<float>& v2);
  */
 float calculate_histogramIntersection(std::vector<float>& hist1, std::vector<float>& hist2);
 #endif //PROJ2_DISTANCE_CALCULATE_H
+
+float calculate_multiHist_distance(std::vector<float> &hist1, std::vector<float> &hist2);
