@@ -2,11 +2,11 @@
 
 ## Team Members
 1. **Yuyang Tian**
-2. **Arun Mekkad** *(Arun, please add your environment details below.)*
+2. **Arun Mekkad**
 
 ## Environment
 - **Yuyang Tian**: macOS 10.13.1 + CLion + CMake
-- **Arun**: *(Add details here.)*
+- **Arun**: (Ubuntu 22.04 LTS + VS Code + CMake)
 
 ## Instructions for Running Executables
 
@@ -32,6 +32,7 @@
   # feature type option
   # 1.7x7 square:  1
   # 2.RGB histogram: 2
+  # 3.Multi histogram: 3
   ```
 - **Example**:
   ```bash
@@ -39,6 +40,8 @@
   ../olympus-test/ ../data/feature_vector_1.csv 1
   # Task2
   ../olympus-test/ ../data/feature_vector_2.csv 2
+  # Task3
+  ../olympus/ ../data/feature_vector_3.csv 3
 #### **Proj2-TopN_finding**
 
 - **Description**: Calculates and saves the image feature vector into the output file.
@@ -48,6 +51,7 @@
   # distance metrics option
   # 1. sum-of-squared-difference: ssd
   # 2. RGB histogram: rgb-hist
+  # 3. Multi histogram: multi-hist
   ```
 - **Example**:
   ```bash
@@ -55,4 +59,7 @@
   ../olympus-test/pic.1016.jpg ../data/feature_vector_1.csv 3 ssd
   # Task2
   ../olympus-test/pic.0164.jpg ../data/feature_vector_2.csv 3 rgb-hist
+  # Task3
+  ../olympus/pic.0274.jpg ../data/feature_vector_3.csv 3 multi-hist
 
+ 

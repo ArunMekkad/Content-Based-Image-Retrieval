@@ -10,6 +10,9 @@
 #include <cstdlib>
 #include <dirent.h>
 
+using namespace cv;
+using namespace std;
+
 /**
 * @brief Extracts features from an image file and appends them to a CSV file.
 *
@@ -70,6 +73,7 @@ int main(int argc, char *argv[]) {
         printf("Feature types:\n");
         printf("1: 7x7 square\n");
         printf("2: RGB histogram\n");
+        printf("3: Multi histogram\n");
         // TODO: add more features here
         exit(-1);
     }
@@ -83,6 +87,10 @@ int main(int argc, char *argv[]) {
         case 2:
             feature_type = FeatureType::RGB_HISTOGRAM;
             printf("Using RGB histogram feature\n");
+            break;
+        case 3:
+            feature_type = FeatureType::MULTI_HISTOGRAM;
+            printf("Using multi histogram feature\n");
             break;
             // TODO: add more features here
 //        case 3:
