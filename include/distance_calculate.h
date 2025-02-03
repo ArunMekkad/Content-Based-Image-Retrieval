@@ -21,4 +21,13 @@ float calculate_ssd(std::vector<float>& v1, std::vector<float>& v2);
  * @return float Histogram intersection value.
  */
 float calculate_histogramIntersection(std::vector<float>& hist1, std::vector<float>& hist2);
+/**
+ * @brief Computes the Cosine Distance between two feature vectors.
+ *
+ * @param vec1 First feature vector.
+ * @param vec2 Second feature vector.
+ * @return Cosine Distance in the range [0, 1], where 0 means identical vectors.
+ */
+float calculate_cosine_distance(std::vector<float>& vec1, std::vector<float>& vec2);
+
 #endif //PROJ2_DISTANCE_CALCULATE_H
