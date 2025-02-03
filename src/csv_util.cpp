@@ -158,55 +158,73 @@ int append_image_data_csv(char *filename, char *image_filename, std::vector<floa
 
   The function returns a non-zero value if something goes wrong.
  */
-int read_image_data_csv( char *filename, std::vector<char *> &filenames, std::vector<std::vector<float>> &data, int echo_file ) {
-  FILE *fp;
-  float fval;
-  char img_file[256];
+int read_image_data_csv(char *filename, std::vector<char *> &filenames, std::vector<std::vector<float>> &data, int echo_file) {
+    FILE *fp;
+    float fval;
+    char img_file[256];
 
-  fp = fopen(filename, "r");
-  if( !fp ) {
-    printf("Unable to open feature file\n");
-    return(-1);
-  }
-
-  printf("Reading %s\n", filename);
-  for(;;) {
-    std::vector<float> dvec;
-    
-    
-    // read the filename
-    if( getstring( fp, img_file ) ) {
-      break;
+    fp = fopen(filename, "r");
+    if (!fp) {
+        printf("Unable to open feature file\n");
+        return -1;
     }
-    // printf("Evaluting %s\n", filename);
 
-    // read the whole feature file into memory
-    for(;;) {
-      // get next feature
-      float eol = getfloat( fp, &fval );
-      dvec.push_back( fval );
-      if( eol ) break;
+    printf("Reading %s\n", filename);
+
+    // Temporary storage for sorting
+    std::vector<std::pair<std::string, std::vector<float>>> file_data_pairs;
+
+    for (;;) {
+        std::vector<float> dvec;
+
+        // Read the filename
+        if (getstring(fp, img_file)) {
+            break;
+        }
+
+        // Read feature data
+        for (;;) {
+            float eol = getfloat(fp, &fval);
+            dvec.push_back(fval);
+            if (eol) break;
+        }
+
+        // Store as pair for sorting
+        file_data_pairs.push_back({std::string(img_file), dvec});
     }
-    // printf("read %lu features\n", dvec.size() );
 
-    data.push_back(dvec);
+    fclose(fp);
+    printf("Finished reading CSV file\n");
 
-    char *fname = new char[strlen(img_file)+1];
-    strcpy(fname, img_file);
-    filenames.push_back( fname );
-  }
-  fclose(fp);
-  printf("Finished reading CSV file\n");
+    // Sort based on filenames (alphabetical order)
+    std::sort(file_data_pairs.begin(), file_data_pairs.end(),
+              [](const std::pair<std::string, std::vector<float>> &a, const std::pair<std::string, std::vector<float>> &b) {
+                  return a.first < b.first;
+              });
 
-  if(echo_file) {
-    for(int i=0;i<data.size();i++) {
-      for(int j=0;j<data[i].size();j++) {
-	printf("%.4f  ", data[i][j] );
-      }
-      printf("\n");
+    // Transfer sorted data back to original vectors
+    filenames.clear();
+    data.clear();
+    for (const auto &entry : file_data_pairs) {
+        // Allocate memory for filename
+        char *fname = new char[entry.first.length() + 1];
+        strcpy(fname, entry.first.c_str());
+        filenames.push_back(fname);
+        data.push_back(entry.second);
     }
-    printf("\n");
-  }
 
-  return(0);
+    // Print data if echo_file is enabled
+    if (echo_file) {
+        for (size_t i = 0; i < data.size(); i++) {
+            printf("%s: ", filenames[i]);
+            for (size_t j = 0; j < data[i].size(); j++) {
+                printf("%.4f  ", data[i][j]);
+            }
+            printf("\n");
+        }
+        printf("\n");
+    }
+
+    return 0;
 }
+
