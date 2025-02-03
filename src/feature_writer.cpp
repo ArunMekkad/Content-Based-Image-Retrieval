@@ -17,6 +17,9 @@
 using namespace cv;
 using namespace std;
 
+using namespace cv;
+using namespace std;
+
 /**
 * @brief Extracts features from an image file and appends them to a CSV file.
 *

@@ -14,6 +14,7 @@
 
 
 using namespace cv;
+using namespace cv;
 using namespace std;
 
 int find_target_index(const char *target_image_filename, vector<char *> &filenames) {

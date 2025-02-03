@@ -9,6 +9,8 @@
 
 using namespace std;
 
+using namespace std;
+
 /**
  * @brief Computes the SSD between two normalized feature vectors.
  *
