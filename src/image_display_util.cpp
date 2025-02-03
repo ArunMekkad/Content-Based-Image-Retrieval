@@ -1,7 +1,8 @@
-//
-// Created by Yuyang Tian on 2025/1/27.
-// Display the image given a vector of filenames
-//
+/*
+ * Authors: Yuyang Tian and Arun Mekkad
+ * Date: January 26, 2025
+ * Purpose: Display the image given a list of vectors
+ */
 #include <opencv2/opencv.hpp>
 #include <vector>
 #include <iostream>

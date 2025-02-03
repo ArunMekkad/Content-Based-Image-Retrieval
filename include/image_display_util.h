@@ -1,6 +1,8 @@
-// ImageDisplay.h
-// Created by Yuyang Tian on 2025/1/27.
-// Header file for displaying images given a vector of filenames
+/*
+ * Authors: Yuyang Tian and Arun Mekkad
+ * Date: January 26, 2025
+ * Purpose: Image display header file
+ */
 
 #ifndef IMAGE_DISPLAY_H
 #define IMAGE_DISPLAY_H

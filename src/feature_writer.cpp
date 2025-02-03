@@ -1,6 +1,10 @@
-//
-// Created by Yuyang Tian on 2025/1/26.
-//
+/*
+ * Authors: Yuyang Tian and Arun Mekkad
+ * Date: January 26, 2025
+ * Purpose: Process a directory of image files, extract 
+ * specified features from each image using a feature 
+ * extraction method, and save the extracted features to a CSV file
+ */
 #include <opencv2/opencv.hpp>
 #include "../include/feature_calculate.h"
 #include "../include/csv_util.h"
@@ -9,6 +13,12 @@
 #include <cstring>
 #include <cstdlib>
 #include <dirent.h>
+
+using namespace cv;
+using namespace std;
+
+using namespace cv;
+using namespace std;
 
 /**
 * @brief Extracts features from an image file and appends them to a CSV file.
@@ -70,6 +80,9 @@ int main(int argc, char *argv[]) {
         printf("Feature types:\n");
         printf("1: 7x7 square\n");
         printf("2: RGB histogram\n");
+        printf("3: Multi histogram\n");
+        printf("4: Texture color\n");
+
         // TODO: add more features here
         exit(-1);
     }
@@ -84,13 +97,21 @@ int main(int argc, char *argv[]) {
             feature_type = FeatureType::RGB_HISTOGRAM;
             printf("Using RGB histogram feature\n");
             break;
+        case 3:
+            feature_type = FeatureType::MULTI_HISTOGRAM;
+            printf("Using multi histogram feature\n");
+            break;
+        case 4:
+            feature_type = FeatureType::TEXTURE_COLOR;
+            printf("Using texture color feature\n");
+            break;
             // TODO: add more features here
 //        case 3:
 //            feature_type = FeatureType::HSV_HISTOGRAM;
 //            printf("Using HSV histogram feature\n");
 //            break;
         default:
-            printf("Invalid feature type. Please select 1, 2, or 3\n");
+            printf("Invalid feature type. Please select 1, 2, 3 or 4\n");
             exit(-1);
     }
 

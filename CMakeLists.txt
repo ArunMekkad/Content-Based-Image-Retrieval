@@ -15,12 +15,14 @@ add_opencv_executable(Proj2-offline_loading
         "../src/feature_writer.cpp"
         "../src/feature_calculate.cpp"
         "../src/csv_util.cpp"
+        "../src/filters.cpp"
 )
 add_opencv_executable(Proj2-TopN_finding
         "../src/image_matcher.cpp"
         "../src/distance_calculate.cpp"
         "../src/csv_util.cpp"
         "../src/image_display_util.cpp"
+        "../src/filters.cpp"
 )
 
 

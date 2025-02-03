@@ -1,8 +1,8 @@
-//
-// Created by Yuyang Tian on 2025/1/26.
-// CS 5330 Computer Vision
-// Spring 2025
-// CPP functions for calculating feature vector of an image
+/*
+ * Authors: Yuyang Tian and Arun Mekkad
+ * Date: January 26, 2025
+ * Purpose: Feature vector header file
+ */
 
 #ifndef PROJ2_FEATURE_CALCULATE_H
 #define PROJ2_FEATURE_CALCULATE_H
@@ -16,9 +16,8 @@ typedef int (*FeatureFunction)(char*, std::vector<float>&);
 enum class FeatureType {
     SQUARE_7X7,
     RGB_HISTOGRAM,
-  // TODO: Please dd more feature type here, Arun
-    HSV_HISTOGRAM,
-    // Add more feature types as needed
+    MULTI_HISTOGRAM,
+    TEXTURE_COLOR
 };
 
 // Helper function to get feature function based on type
@@ -40,5 +39,9 @@ int get7x7square(char *image_filename, std::vector<float> &image_data);
  * @return non-zero failure.
  */
 int calculateRGBHistogram(char *image_filename, std::vector<float>& hist);
+
+int getMultiHistogramFeature(char *image_filename, std::vector<float> &image_data);
+
+int getTextureColorFeature(char* image_filename, std::vector<float>& feature);
 
 #endif //PROJ2_FEATURE_CALCULATE_H
