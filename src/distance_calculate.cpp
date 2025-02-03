@@ -1,9 +1,15 @@
-//
-// Created by Yuyang Tian on 2025/1/26.
-//
+/*
+ * Authors: Yuyang Tian and Arun Mekkad
+ * Date: January 26, 2025
+ * Purpose: Function prototypes for distance calculation
+ */
 
 #include "../include/distance_calculate.h"
 #include <cmath>
+
+using namespace std;
+
+using namespace std;
 
 /**
  * @brief Computes the SSD between two normalized feature vectors.
@@ -45,41 +51,6 @@ float calculate_histogramIntersection(std::vector<float>& hist1, std::vector<flo
     return intersection;
 }
 
-/**
- * @brief Computes the Cosine Distance between two feature vectors.
- *
- * @param vec1 First feature vector.
- * @param vec2 Second feature vector.
- * @return Cosine Distance in the range [0, 1], where 0 means identical vectors.
- */
-float calculate_cosineDistance(std::vector<float>& vec1, std::vector<float>& vec2) {
-    // Check if vectors are valid (same size and non-empty)
-    if (vec1.size() != vec2.size() || vec1.empty()) {
-        return 1.0f;  // Return maximum distance (completely dissimilar) if invalid
-    }
-
-    float dotProduct = 0.0f; // Sum of element-wise multiplication
-    float norm1 = 0.0f;
-    float norm2 = 0.0f;
-
-    // Compute dot product and norms (L2 norm squared)
-    for (size_t i = 0; i < vec1.size(); i++) {
-        dotProduct += vec1[i] * vec2[i]; // a · b
-        norm1 += vec1[i] * vec1[i];      // ||a||^2
-        norm2 += vec2[i] * vec2[i];      // ||b||^2
-    }
-
-    // Avoid division by zero
-    if (norm1 == 0.0f || norm2 == 0.0f) {
-        return 1.0f;  // Return max distance if either vector is zero
-    }
-
-    // Compute cosine similarity: cos(θ) = (a · b) / (||a|| * ||b||)
-    float cosineSimilarity = dotProduct / (std::sqrt(norm1) * std::sqrt(norm2));
-
-    // Cosine Distance = 1 - Cosine Similarity
-    return 1.0f - cosineSimilarity;
-}
 
 /**
  * @brief Computes the Cosine Distance between two feature vectors.
@@ -88,7 +59,7 @@ float calculate_cosineDistance(std::vector<float>& vec1, std::vector<float>& vec
  * @param vec2 Second feature vector.
  * @return Cosine Distance in the range [0, 1], where 0 means identical vectors.
  */
-float calculate_cosineDistance(std::vector<float>& vec1, std::vector<float>& vec2) {
+float calculate_cosine_distance(std::vector<float>& vec1, std::vector<float>& vec2) {
     // Check if vectors are valid (same size and non-empty)
     if (vec1.size() != vec2.size() || vec1.empty()) {
         return 1.0f;  // Return maximum distance (completely dissimilar) if invalid
@@ -118,5 +89,47 @@ float calculate_cosineDistance(std::vector<float>& vec1, std::vector<float>& vec
 }
 // TODO: combine the two distance
 float calculate_depthDNN_distance(std::vector<float>& vec1, std::vector<float>& vec2) {
+
+// Function to calculate distance between two concatenated histograms
+//  * @param hist1 First concatenated histogram.
+//  * @param hist2 Second concatenated histogram.
+//  * @return float Distance value.
+
+float calculate_multiHist_distance(std::vector<float> &hist1, std::vector<float> &hist2) {
+    // Split concatenated histograms
+    size_t mid = hist1.size()/2;
+    std::vector<float> top1(hist1.begin(), hist1.begin()+mid);
+    std::vector<float> bottom1(hist1.begin()+mid, hist1.end());
+    
+    std::vector<float> top2(hist2.begin(), hist2.begin()+mid);
+    std::vector<float> bottom2(hist2.begin()+mid, hist2.end());
+    
+    // Calculate individual distances
+    float d_top = 1 - calculate_histogramIntersection(top1, top2);
+    float d_bottom = 1 - calculate_histogramIntersection(bottom1, bottom2);
+    
+    return 0.5 * d_top + 0.5 * d_bottom; // Equal weighting
+}
+
+// Function to calculate distance between two texture-color histograms
+//  * @param hist1 First texture-color histogram.
+//  * @param hist2 Second texture-color histogram.
+//  * @return float Distance value.
+
+float calculate_textureColor_distance(std::vector<float>& hist1, std::vector<float>& hist2) {
+    // Split into color (first 512 elements) and texture (remaining)
+    size_t color_size = 8*8*8; // 512 elements for 8-bin RGB
+    std::vector<float> color1(hist1.begin(), hist1.begin()+color_size);
+    std::vector<float> color2(hist2.begin(), hist2.begin()+color_size);
+    
+    std::vector<float> tex1(hist1.begin()+color_size, hist1.end());
+    std::vector<float> tex2(hist2.begin()+color_size, hist2.end());
+
+    // Compute individual distances
+    float d_color = 1 - calculate_histogramIntersection(color1, color2);
+    float d_tex = 1 - calculate_histogramIntersection(tex1, tex2);
+
+    // Combine with equal weights
+    return 0.5f * d_color + 0.5f * d_tex;
 
 }

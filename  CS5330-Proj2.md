@@ -27,8 +27,26 @@ The histogram matching is also implemented in two phrase fashion, similarly:
 
 <img src="/Users/yuyangtian/Documents/NEU/CS5330/Proj2/report-img/task2-image.png" alt="image-20250128160209428" style="zoom: 50%;" />
 
+#### Task3 - Multi Histogram
+
+Splits the image into top and bottom halves
+Calculates separate RGB histograms for each half using 8 bins per channel
+Concatenates the two histograms to form a single feature vector
+Uses a weighted distance metric combining histogram intersections of both halves
+Implemented in getMultiHistogramFeature and calculate_multiHist_distance functions
+
+#### Task4 - Texture and color matching
+
+Extracts RGB histogram for color (8 bins per channel)
+Computes texture features using Sobel gradients and a 16-bin magnitude histogram
+Concatenates color and texture histograms into a single feature vector
+Uses a weighted distance metric combining color and texture similarities
+Implemented in getTextureColorFeature and calculate_textureColor_distance functions
+
 ### Acknowledgement
 
 https://mpatacchiola.github.io/blog/2016/11/12/the-simplest-classifier-histogram-intersection.html
 
 https://www.youtube.com/watch?v=r565euxWZBs
+
+https://www.youtube.com/watch?v=gpu9p3d53fg

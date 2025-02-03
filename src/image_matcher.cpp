@@ -1,6 +1,8 @@
-//
-// Created by Yuyang Tian on 2025/1/26.
-// For task1 baseline matching, ssd is used for distance calculation
+/*
+ * Authors: Yuyang Tian and Arun Mekkad
+ * Date: January 26, 2025
+ * Purpose: Find and display the top N matching images based on feature vectors
+ */
 #include "../include/csv_util.h"
 #include "../include/distance_calculate.h"
 #include "../include/image_display_util.h"
@@ -11,6 +13,8 @@
 #include <vector>
 
 
+using namespace cv;
+using namespace cv;
 using namespace std;
 
 int find_target_index(const char *target_image_filename, vector<char *> &filenames) {
@@ -98,6 +102,67 @@ int find_topN_matches_rgb_hist(char* target_image_filename, std::vector<char *> 
     return 0;
 }
 
+// Function to find top N matches using multi histogram distance
+
+int find_topN_matches_multiHist(char* target_image_filename, std::vector<char *> &filenames, 
+                                std::vector<std::vector<float>> &data, int N, std::vector<char *> &output)
+{
+    // Step1: find the target
+    int target_index = find_target_index(target_image_filename, filenames);
+    // If the target image is not found, return an error
+    if (target_index == -1) {
+        std::cerr << "Target image not found!" << std::endl;
+        return -1;
+    }
+
+    // Step2: calculate the corresponding distance
+    std::vector<float>& target_vector = data[target_index];
+    vector<pair<float, int>> distances; // Pair of distance and index
+
+    for (size_t i = 0; i < data.size(); i++) {
+        if (i == target_index) {
+            continue;
+        }
+        float dist = calculate_multiHist_distance(data[i], target_vector);
+        distances.push_back({dist, static_cast<int>(i)});
+    }
+
+    // Step 3: Sort the pair,
+    sort(distances.begin(), distances.end());
+    // Step 4: get N of them and return
+    for (int i = 0; i < N && i < distances.size(); i++) {
+        int match_index = distances[i].second;
+        output.push_back(filenames[match_index]);
+    }
+    return 0;
+}
+
+/**
+ * Function to find top N matches using texture color distance
+ */
+int find_topN_matches_textureColor(char* target_image_filename,std::vector<char*>& filenames,
+                                  std::vector<std::vector<float>>& data,int N,std::vector<char*>& output) 
+{
+    int target_index = find_target_index(target_image_filename, filenames);
+    if(target_index == -1) return -1;
+
+    std::vector<float>& target = data[target_index];
+    std::vector<std::pair<float, int>> distances;
+
+    for(size_t i=0; i<data.size(); i++) {
+        if(i == target_index) continue;
+        float dist = calculate_textureColor_distance(data[i], target);
+        distances.push_back({dist, static_cast<int>(i)});
+    }
+
+    std::sort(distances.begin(), distances.end());
+    for(int i=0; i<N && i<distances.size(); i++) {
+        output.push_back(filenames[distances[i].second]);
+    }
+    return 0;
+}
+
+
 /**
  * Main function that finds and displays the top N matching images based on feature vectors.
  *
@@ -123,7 +188,7 @@ int main(int argc, char* argv[]) {
     // Step 1: check for sufficient arguments
     if(argc < 5) {
         printf("usage: %s <target_image> <feature_file> <N> <distance_metric>\n", argv[0]);
-        printf("distance_metric options: ssd, rgb-hist\n");
+        printf("distance_metric options: ssd, rgb-hist, multi-hist, texture-color\n");
         exit(-1);
     }
 
@@ -145,8 +210,8 @@ int main(int argc, char* argv[]) {
     // Step 5: Get distance metric
     distance_metric = argv[4];
     // TODO: Add other metrics here
-    if (distance_metric != "ssd" && distance_metric != "rgb-hist") {
-        printf("Invalid distance metric: %s. Must be 'ssd' or 'intersection'.\n", argv[4]);
+    if (distance_metric != "ssd" && distance_metric != "rgb-hist" && distance_metric != "multi-hist" && distance_metric != "texture-color") {
+        printf("Invalid distance metric: %s. Must be 'ssd', 'intersection', 'multi-hist' or 'texture-color'.\n", argv[4]);
         exit(-1);
     }
     printf("Using distance metric: %s\n", distance_metric.c_str());
@@ -167,6 +232,12 @@ int main(int argc, char* argv[]) {
         result = find_topN_matches_ssd(target_image, filenames, data, N, output);
     } else if (distance_metric == "rgb-hist") {
         result = find_topN_matches_rgb_hist(target_image, filenames, data, N, output);
+    }
+    else if (distance_metric == "multi-hist") {
+    result = find_topN_matches_multiHist(target_image, filenames, data, N, output);
+    }
+    else if (distance_metric == "texture-color") {
+    result = find_topN_matches_textureColor(target_image, filenames, data, N, output);
     }
 
     // Step 7: verify the output
