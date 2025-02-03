@@ -180,7 +180,13 @@ int main(int argc, char* argv[]) {
         printf("%s ", filename);
     }
     std::cout << std::endl;
-
+    // Display target and result image
+    cv::Mat target = cv::imread(target_image);
+    if (target.empty()) {
+        printf("Target image empty!\n", argv[0]);
+        exit(-1);
+    }
+    cv::imshow("target", target);
     displayGallery(output);
     return 0;
 }
