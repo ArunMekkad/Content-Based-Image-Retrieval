@@ -51,6 +51,45 @@ float calculate_histogramIntersection(std::vector<float>& hist1, std::vector<flo
     return intersection;
 }
 
+
+/**
+ * @brief Computes the Cosine Distance between two feature vectors.
+ *
+ * @param vec1 First feature vector.
+ * @param vec2 Second feature vector.
+ * @return Cosine Distance in the range [0, 1], where 0 means identical vectors.
+ */
+float calculate_cosine_distance(std::vector<float>& vec1, std::vector<float>& vec2) {
+    // Check if vectors are valid (same size and non-empty)
+    if (vec1.size() != vec2.size() || vec1.empty()) {
+        return 1.0f;  // Return maximum distance (completely dissimilar) if invalid
+    }
+
+    float dotProduct = 0.0f; // Sum of element-wise multiplication
+    float norm1 = 0.0f;
+    float norm2 = 0.0f;
+
+    // Compute dot product and norms (L2 norm squared)
+    for (size_t i = 0; i < vec1.size(); i++) {
+        dotProduct += vec1[i] * vec2[i]; // a · b
+        norm1 += vec1[i] * vec1[i];      // ||a||^2
+        norm2 += vec2[i] * vec2[i];      // ||b||^2
+    }
+
+    // Avoid division by zero
+    if (norm1 == 0.0f || norm2 == 0.0f) {
+        return 1.0f;  // Return max distance if either vector is zero
+    }
+
+    // Compute cosine similarity: cos(θ) = (a · b) / (||a|| * ||b||)
+    float cosineSimilarity = dotProduct / (std::sqrt(norm1) * std::sqrt(norm2));
+
+    // Cosine Distance = 1 - Cosine Similarity
+    return 1.0f - cosineSimilarity;
+}
+// TODO: combine the two distance
+float calculate_depthDNN_distance(std::vector<float>& vec1, std::vector<float>& vec2) {
+
 // Function to calculate distance between two concatenated histograms
 //  * @param hist1 First concatenated histogram.
 //  * @param hist2 Second concatenated histogram.
@@ -92,4 +131,5 @@ float calculate_textureColor_distance(std::vector<float>& hist1, std::vector<flo
 
     // Combine with equal weights
     return 0.5f * d_color + 0.5f * d_tex;
+
 }
