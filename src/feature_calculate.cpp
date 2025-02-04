@@ -6,6 +6,7 @@
 
 #include "../include/feature_calculate.h"
 #include "../include/filters.h"
+#include "../include/DA2Network.hpp"
 #include <opencv2/opencv.hpp>
 
 using namespace cv;
@@ -22,9 +23,16 @@ FeatureFunction getFeatureFunction(FeatureType type) {
             return getMultiHistogramFeature;
         case FeatureType::TEXTURE_COLOR:
             return getTextureColorFeature;
+        case FeatureType::DEPTH:
+            return getTextureColorFeatureWithDepth;
         default:
             return nullptr;
     }
+}
+
+static DA2Network& initializeDA2() {
+    static DA2Network da_net("../include/model_fp16.onnx");  // Static: Created only once
+    return da_net;  // Return reference to the same object
 }
 
 int get7x7square(char *image_filename, std::vector<float> &image_data) {
@@ -68,8 +76,8 @@ int get7x7square(char *image_filename, std::vector<float> &image_data) {
  * @return non-zero failure.
  */
 int calculateRGBHistogram(char *image_filename, std::vector<float>& hist) {
-    const int BINs = 8; // 8 bins for each channel
-    const int BIN_SIZE = 256 / BINs;
+    int bins = 8;
+    const int BIN_SIZE = 256 / bins;
     // Step 1: read the image
     Mat img = imread(image_filename);
     if (img.empty()) {
@@ -78,7 +86,7 @@ int calculateRGBHistogram(char *image_filename, std::vector<float>& hist) {
     }
     // Initiate the 3D histogram -> flatten 1D histogram for R, G, B bins
     hist.clear();
-    hist.resize(BINs * BINs * BINs, 0.0f);
+    hist.resize(bins * bins * bins, 0.0f);
 
     // Step 2: calculate the frequency of each pixel
     for (int i = 0; i < img.rows; i++) {
@@ -88,7 +96,7 @@ int calculateRGBHistogram(char *image_filename, std::vector<float>& hist) {
             int binG = color[1] / BIN_SIZE;
             int binR = color[2] / BIN_SIZE;
             // mapping 3d index to the mat
-            int binIndex = binR * BINs * BINs + binG * BINs + binB;
+            int binIndex = binR * bins * bins + binG * bins + binB;
             hist[binIndex]++;
         }
     }
@@ -142,21 +150,21 @@ int getMultiHistogramFeature(char *image_filename, std::vector<float> &image_dat
         std::cerr << "Error loading image: " << image_filename << std::endl;
         return -1;
     }
-    
+
     // Split image into top/bottom halves
     cv::Mat top_half = image(cv::Rect(0, 0, image.cols, image.rows/2));
     cv::Mat bottom_half = image(cv::Rect(0, image.rows/2, image.cols, image.rows/2));
-    
+
     // Calculate histograms for each region
     std::vector<float> top_hist, bottom_hist;
     calculateMultiHistogram(top_half, top_hist, bins);
     calculateMultiHistogram(bottom_half, bottom_hist, bins);
-    
+
     // Concatenate histograms
     image_data.clear();
     image_data.insert(image_data.end(), top_hist.begin(), top_hist.end());
     image_data.insert(image_data.end(), bottom_hist.begin(), bottom_hist.end());
-    
+
     return 0;
 }
 
@@ -186,7 +194,9 @@ int computeTextureFeature(const cv::Mat& image, std::vector<float>& tex_hist, in
     cv::normalize(gradient_mag, gradient_mag, 0, 255, cv::NORM_MINMAX);
     gradient_mag.convertTo(gradient_mag, CV_8UC1);
 
+    return 0;
 }
+
 // Function to get texture-color feature by combining color and texture histograms
 
 int getTextureColorFeature(char* image_filename, std::vector<float>& feature) {
@@ -212,3 +222,139 @@ int getTextureColorFeature(char* image_filename, std::vector<float>& feature) {
     return 0;
 }
 
+
+
+void computeDepthMaskFromDA2(cv::Mat& src, cv::Mat& depth, cv::Mat& mask) {
+    // Flatten depth values into a vector
+    DA2Network& da2Network = initializeDA2();
+    da2Network.set_input(src, 1);
+    da2Network.run_network(depth, src.size());
+    std::vector<float> depth_values;  // DA2 depth may use 16-bit
+    for (int i = 0; i < depth.rows; i++) {
+        for (int j = 0; j < depth.cols; j++) {
+            depth_values.push_back(depth.at<float>(i, j));
+        }
+    }
+    // Sort depth values
+    std::sort(depth_values.begin(), depth_values.end());
+
+    // Compute median depth (50th percentile)
+    int median_index = depth_values.size() * 0.50;
+    ushort median_depth = depth_values[median_index];
+
+    // Define a depth range (50% close)
+    ushort min_depth = median_depth * 0.5;
+    ushort max_depth = median_depth * 1.5;
+
+    // Create a binary mask: Keep pixels where depth is within this range
+    mask = (depth >= min_depth) & (depth <= max_depth);
+}
+int computeGradientMagnitude(cv::Mat& gray, cv::Mat& gradient_mag) {
+    // Compute Sobel gradients using manual functions
+    cv::Mat sobelX, sobelY;
+    sobelX3x3(gray, sobelX);
+    sobelY3x3(gray, sobelY);
+
+    // Pre-allocate gradient magnitude matrix
+    gradient_mag.create(gray.size(), CV_32F);
+
+    // Compute gradient magnitude
+    for (int i = 0; i < gray.rows; i++) {
+        for (int j = 0; j < gray.cols; j++) {
+            float x = static_cast<float>(sobelX.at<short>(i, j));
+            float y = static_cast<float>(sobelY.at<short>(i, j));
+            gradient_mag.at<float>(i, j) = std::sqrt(x * x + y * y);
+        }
+    }
+
+    // Normalize to [0,1]
+    cv::normalize(gradient_mag, gradient_mag, 0, 1, cv::NORM_MINMAX);
+    return 0;
+}
+// Overloading Function to compute the RGB histogram for selected pixels
+int calculateRGBHistogram(const cv::Mat& image, const cv::Mat& mask, std::vector<float>& hist, int bins) {
+    const int BIN_SIZE = 256 / bins;
+
+    hist.clear();
+    hist.resize(bins * bins * bins, 0.0f);
+
+    int valid_pixel_count = 0;
+
+    for (int i = 0; i < image.rows; i++) {
+        for (int j = 0; j < image.cols; j++) {
+            if (mask.at<uchar>(i, j) == 0) continue; // Ignore pixels not in depth range
+
+            cv::Vec3b color = image.at<cv::Vec3b>(i, j);
+            int binB = color[0] / BIN_SIZE;
+            int binG = color[1] / BIN_SIZE;
+            int binR = color[2] / BIN_SIZE;
+            int binIndex = binR * bins * bins + binG * bins + binB;
+            hist[binIndex]++;
+            valid_pixel_count++;
+        }
+    }
+
+    // Normalize the histogram
+    if (valid_pixel_count > 0) {
+        for (float &val : hist) val /= valid_pixel_count;
+    }
+
+    return 0;
+}
+
+// Overloading Function to compute texture histogram with depth filtering
+int computeTextureFeature(cv::Mat& image, cv::Mat& mask, std::vector<float>& tex_hist, int bins) {
+    // Convert to grayscale
+    cv::Mat gray;
+    cv::cvtColor(image, gray, cv::COLOR_BGR2GRAY);
+
+    // Compute gradient magnitude
+    cv::Mat gradient_mag;
+    computeGradientMagnitude(gray, gradient_mag);
+
+    // Initialize histogram
+    tex_hist.assign(bins, 0.0f);
+    int valid_pixel_count = 0;
+
+    // Compute histogram using optimized iteration
+    for (int i = 0; i < gray.rows; i++) {
+        for (int j = 0; j < gray.cols; j++) {
+            if (mask.at<uchar>(i, j) == 0) continue; // Ignore pixels outside depth threshold
+
+            int bin_idx = static_cast<int>(gradient_mag.at<float>(i, j) * (bins - 1));
+            tex_hist[bin_idx]++;
+            valid_pixel_count++;
+        }
+    }
+    // Normalize histogram
+    if (valid_pixel_count > 0) {
+        for (float &val : tex_hist) val /= valid_pixel_count;
+    }
+
+    return 0;
+}
+//Texture color with a mask based on depth closeness (50% range around median)
+int getTextureColorFeatureWithDepth(char* image_filename, std::vector<float>& feature) {
+    // Load RGB image
+    cv::Mat image = cv::imread(image_filename);
+    if (image.empty()) return -1;
+
+    // Load DA2 depth map
+    cv::Mat depth;
+    // Compute mask based on depth closeness (50% range around median)
+    cv::Mat mask;
+    computeDepthMaskFromDA2(image, depth, mask);
+
+    // Compute histograms only for valid pixels
+    int bins = 8;
+    std::vector<float> color_hist, tex_hist;
+    calculateRGBHistogram(image, mask, color_hist, bins);
+    computeTextureFeature(image, mask, tex_hist, bins);
+
+    // Concatenate features
+    feature.clear();
+    feature.insert(feature.end(), color_hist.begin(), color_hist.end());
+    feature.insert(feature.end(), tex_hist.begin(), tex_hist.end());
+
+    return 0;
+}

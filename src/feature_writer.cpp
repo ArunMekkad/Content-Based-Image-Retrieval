@@ -17,9 +17,6 @@
 using namespace cv;
 using namespace std;
 
-using namespace cv;
-using namespace std;
-
 /**
 * @brief Extracts features from an image file and appends them to a CSV file.
 *
@@ -82,7 +79,7 @@ int main(int argc, char *argv[]) {
         printf("2: RGB histogram\n");
         printf("3: Multi histogram\n");
         printf("4: Texture color\n");
-
+        printf("7: Depth value from DA2\n");
         // TODO: add more features here
         exit(-1);
     }
@@ -105,11 +102,10 @@ int main(int argc, char *argv[]) {
             feature_type = FeatureType::TEXTURE_COLOR;
             printf("Using texture color feature\n");
             break;
-            // TODO: add more features here
-//        case 3:
-//            feature_type = FeatureType::HSV_HISTOGRAM;
-//            printf("Using HSV histogram feature\n");
-//            break;
+        case 7:
+            feature_type = FeatureType::DEPTH;
+            printf("Using Depth vector feature\n");
+            break;
         default:
             printf("Invalid feature type. Please select 1, 2, 3 or 4\n");
             exit(-1);

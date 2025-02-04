@@ -17,7 +17,8 @@ enum class FeatureType {
     SQUARE_7X7,
     RGB_HISTOGRAM,
     MULTI_HISTOGRAM,
-    TEXTURE_COLOR
+    TEXTURE_COLOR,
+    DEPTH,
 };
 
 // Helper function to get feature function based on type
@@ -40,8 +41,18 @@ int get7x7square(char *image_filename, std::vector<float> &image_data);
  */
 int calculateRGBHistogram(char *image_filename, std::vector<float>& hist);
 
+/**
+ * @brief Calculates a 3D RGB color histogram for an image.
+ *
+ * @param image Input image filename.
+ * @param hist A 1D Vector representing the depth feature vector.
+ * @return non-zero failure.
+ */
 int getMultiHistogramFeature(char *image_filename, std::vector<float> &image_data);
 
 int getTextureColorFeature(char* image_filename, std::vector<float>& feature);
+// Function to extract combined RGB and texture features using DA2 depth map
+// Compute mask based on depth closeness (50% range around median)
+int getTextureColorFeatureWithDepth(char* image_filename, std::vector<float>& feature);
 
 #endif //PROJ2_FEATURE_CALCULATE_H
