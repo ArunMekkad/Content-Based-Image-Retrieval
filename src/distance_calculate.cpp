@@ -88,12 +88,13 @@ float calculate_cosine_distance(std::vector<float>& vec1, std::vector<float>& ve
     return 1.0f - cosineSimilarity;
 }
 // TODO: combine the two distance
-float calculate_depthDNN_distance(std::vector<float>& vec1, std::vector<float>& vec2) {
+// float calculate_depthDNN_distance(std::vector<float>& vec1, std::vector<float>& vec2) {
 
-// Function to calculate distance between two concatenated histograms
-//  * @param hist1 First concatenated histogram.
-//  * @param hist2 Second concatenated histogram.
-//  * @return float Distance value.
+// // Function to calculate distance between two concatenated histograms
+// //  * @param hist1 First concatenated histogram.
+// //  * @param hist2 Second concatenated histogram.
+// //  * @return float Distance value.
+// }
 
 float calculate_multiHist_distance(std::vector<float> &hist1, std::vector<float> &hist2) {
     // Split concatenated histograms
