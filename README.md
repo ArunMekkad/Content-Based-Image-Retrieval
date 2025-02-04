@@ -3,11 +3,9 @@
 ## Team Members
 1. **Yuyang Tian**
 2. **Arun Mekkad**
-2. **Arun Mekkad**
 
 ## Environment
 - **Yuyang Tian**: macOS 10.13.1 + CLion + CMake
-- **Arun**: (Ubuntu 22.04 LTS + VS Code + CMake)
 - **Arun**: (Ubuntu 22.04 LTS + VS Code + CMake)
 
 ## Instructions for Running Executables
@@ -70,9 +68,7 @@
 
   # Task2
   ../olympus-test/pic.0164.jpg ../data/feature_vector_2.csv 3 rgb-hist
-  # Task3
-  ../olympus/pic.0274.jpg ../data/feature_vector_3.csv 3 multi-hist
-
+  
   # Task3
   ../olympus/pic.0274.jpg ../data/feature_vector_3.csv 3 multi-hist
   
