@@ -1,5 +1,7 @@
 # Project 2
 
+## Project: [Report Link](https://docs.google.com/document/d/1GSQYxn4meG6uxprJJ3AXL2RdfmDbJhp-DzZt_QJ7Cxk/edit?addon_store&tab=t.0#heading=h.1ikululub2bq)
+
 ## Team Members
 1. **Yuyang Tian**
 2. **Arun Mekkad**
@@ -34,20 +36,24 @@
   # 2. RGB histogram: 2
   # 3. Multi histogram: 3
   # 4. Texture-color: 4
+  # 7. Depth from DA2: 7
   ```
 - **Example**:
   ```bash
   # Task1
-  ../olympus-test/ ../data/feature_vector_1.csv 1
-
+  ../olympus/ ../data/feature_vector_1.csv 1
+  
   # Task2
-  ../olympus-test/ ../data/feature_vector_2.csv 2
-
+  ../olympus/ ../data/feature_vector_2.csv 2
+  
   # Task3
   ../olympus/ ../data/feature_vector_3.csv 3
-
+  
   # Task4
   ../olympus/ ../data/feature_vector_4.csv 4
+  
+  # Task7
+  ../olympus-test/ ../data/feature_vector_7.csv 7
 
 #### **Proj2-TopN_finding**
 
@@ -60,19 +66,26 @@
   # 2. RGB histogram: rgb-hist
   # 3. Multi histogram: multi-hist
   # 4. Texture-color: texture-color
+  # 7. Texture-color with Depth mask: depth
   ```
 - **Example**:
   ```bash
   # Task1
-  ../olympus-test/pic.1016.jpg ../data/feature_vector_1.csv 3 ssd
-
+  ../olympus/pic.1016.jpg ../data/feature_vector_1.csv 3 ssd
+  
   # Task2
-  ../olympus-test/pic.0164.jpg ../data/feature_vector_2.csv 3 rgb-hist
+  ../olympus/pic.0164.jpg ../data/feature_vector_2.csv 3 rgb-hist
+  
+  # Task3
+  ../olympus/pic.0274.jpg ../data/feature_vector_3.csv 3 multi-hist
   
   # Task3
   ../olympus/pic.0274.jpg ../data/feature_vector_3.csv 3 multi-hist
   
   # Task4
   ../olympus/pic.0535.jpg ../data/feature_vector_4.csv 4 texture-color
+  
+  # Task7
+  ../olympus-test/pic.0281.jpg ../data/feature_vector_7.csv 5 depth
 
  

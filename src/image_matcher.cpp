@@ -14,7 +14,6 @@
 
 
 using namespace cv;
-using namespace cv;
 using namespace std;
 
 int find_target_index(const char *target_image_filename, vector<char *> &filenames) {
@@ -32,7 +31,8 @@ int find_target_index(const char *target_image_filename, vector<char *> &filenam
  * Function to find top N matches using SSD distance
  * @return non-zero failure
  */
-int find_topN_matches_ssd(char* target_image_filename, std::vector<char *> &filenames, std::vector<std::vector<float>> &data, int N, std::vector<char *> &output) {
+int find_topN_matches_ssd(char *target_image_filename, std::vector<char *> &filenames,
+                          std::vector<std::vector<float>> &data, int N, std::vector<char *> &output) {
     // data format is
     //  The image filename is written to the first position in the row of data.
     //  The values in image_data are all written to the file as floats.
@@ -45,7 +45,7 @@ int find_topN_matches_ssd(char* target_image_filename, std::vector<char *> &file
     }
 
     // Step2: calculate the corresponding distance
-    std::vector<float>& target_vector = data[target_index];
+    std::vector<float> &target_vector = data[target_index];
     vector<pair<float, int>> distances; // Pair of distance and index
 
     for (size_t i = 0; i < data.size(); i++) {
@@ -66,11 +66,13 @@ int find_topN_matches_ssd(char* target_image_filename, std::vector<char *> &file
     }
     return 0;
 }
+
 /**
  * Function to find top N matches using RGB histogram intersection
  * @return non-zero failure
  */
-int find_topN_matches_rgb_hist(char* target_image_filename, std::vector<char *> &filenames, std::vector<std::vector<float>> &data, int N, std::vector<char *> &output) {
+int find_topN_matches_rgb_hist(char *target_image_filename, std::vector<char *> &filenames,
+                               std::vector<std::vector<float>> &data, int N, std::vector<char *> &output) {
     // Step1: find the target
     int target_index = find_target_index(target_image_filename, filenames);
     // If the target image is not found, return an error
@@ -80,7 +82,7 @@ int find_topN_matches_rgb_hist(char* target_image_filename, std::vector<char *> 
     }
 
     // Step2: calculate the corresponding distance
-    std::vector<float>& target_vector = data[target_index];
+    std::vector<float> &target_vector = data[target_index];
     vector<pair<float, int>> distances; // Pair of distance and index
 
     for (size_t i = 0; i < data.size(); i++) {
@@ -104,9 +106,8 @@ int find_topN_matches_rgb_hist(char* target_image_filename, std::vector<char *> 
 
 // Function to find top N matches using multi histogram distance
 
-int find_topN_matches_multiHist(char* target_image_filename, std::vector<char *> &filenames, 
-                                std::vector<std::vector<float>> &data, int N, std::vector<char *> &output)
-{
+int find_topN_matches_multiHist(char *target_image_filename, std::vector<char *> &filenames,
+                                std::vector<std::vector<float>> &data, int N, std::vector<char *> &output) {
     // Step1: find the target
     int target_index = find_target_index(target_image_filename, filenames);
     // If the target image is not found, return an error
@@ -116,7 +117,7 @@ int find_topN_matches_multiHist(char* target_image_filename, std::vector<char *>
     }
 
     // Step2: calculate the corresponding distance
-    std::vector<float>& target_vector = data[target_index];
+    std::vector<float> &target_vector = data[target_index];
     vector<pair<float, int>> distances; // Pair of distance and index
 
     for (size_t i = 0; i < data.size(); i++) {
@@ -140,28 +141,29 @@ int find_topN_matches_multiHist(char* target_image_filename, std::vector<char *>
 /**
  * Function to find top N matches using texture color distance
  */
-int find_topN_matches_textureColor(char* target_image_filename,std::vector<char*>& filenames,
-                                  std::vector<std::vector<float>>& data,int N,std::vector<char*>& output) 
-{
+int find_topN_matches_textureColor(char *target_image_filename, std::vector<char *> &filenames,
+                                   std::vector<std::vector<float>> &data, int N, std::vector<char *> &output) {
     int target_index = find_target_index(target_image_filename, filenames);
-    if(target_index == -1) return -1;
+    if (target_index == -1) {
+        std::cerr << "Target image not found!" << std::endl;
+        return -1;
+    }
 
-    std::vector<float>& target = data[target_index];
+    std::vector<float> &target = data[target_index];
     std::vector<std::pair<float, int>> distances;
 
-    for(size_t i=0; i<data.size(); i++) {
-        if(i == target_index) continue;
+    for (size_t i = 0; i < data.size(); i++) {
+        if (i == target_index) continue;
         float dist = calculate_textureColor_distance(data[i], target);
         distances.push_back({dist, static_cast<int>(i)});
     }
 
     std::sort(distances.begin(), distances.end());
-    for(int i=0; i<N && i<distances.size(); i++) {
+    for (int i = 0; i < N && i < distances.size(); i++) {
         output.push_back(filenames[distances[i].second]);
     }
     return 0;
 }
-
 
 /**
  * Main function that finds and displays the top N matching images based on feature vectors.
@@ -179,16 +181,16 @@ int find_topN_matches_textureColor(char* target_image_filename,std::vector<char*
  *             argv[4] - Distance_metric representing the matching method
  * @return 0 on success, non-zero on failure.
  */
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
     char target_image[256];
     char feature_file[256];
     int N;
     std::string distance_metric;
 
     // Step 1: check for sufficient arguments
-    if(argc < 5) {
+    if (argc < 5) {
         printf("usage: %s <target_image> <feature_file> <N> <distance_metric>\n", argv[0]);
-        printf("distance_metric options: ssd, rgb-hist, multi-hist, texture-color\n");
+        printf("distance_metric options: ssd, rgb-hist, multi-hist, texture-color, depth\n");
         exit(-1);
     }
 
@@ -210,11 +212,13 @@ int main(int argc, char* argv[]) {
     // Step 5: Get distance metric
     distance_metric = argv[4];
     // TODO: Add other metrics here
-    if (distance_metric != "ssd" && distance_metric != "rgb-hist" && distance_metric != "multi-hist" && distance_metric != "texture-color") {
-        printf("Invalid distance metric: %s. Must be 'ssd', 'intersection', 'multi-hist' or 'texture-color'.\n", argv[4]);
-        exit(-1);
+    if (distance_metric != "ssd" && distance_metric != "rgb-hist" && distance_metric != "multi-hist" &&
+        distance_metric != "texture-color" && distance_metric != "depth") {
+        printf("Invalid distance metric: %s. Must be 'ssd', 'intersection', 'multi-hist' or 'texture-color' or 'depth'.\n",
+               argv[4]);
+
+        printf("Using distance metric: %s\n", distance_metric.c_str());
     }
-    printf("Using distance metric: %s\n", distance_metric.c_str());
 
     std::vector<char *> filenames;
     std::vector<std::vector<float>> data;
@@ -232,13 +236,14 @@ int main(int argc, char* argv[]) {
         result = find_topN_matches_ssd(target_image, filenames, data, N, output);
     } else if (distance_metric == "rgb-hist") {
         result = find_topN_matches_rgb_hist(target_image, filenames, data, N, output);
+    } else if (distance_metric == "multi-hist") {
+        result = find_topN_matches_multiHist(target_image, filenames, data, N, output);
+    } else if (distance_metric == "texture-color") {
+        result = find_topN_matches_textureColor(target_image, filenames, data, N, output);
+    } else if (distance_metric == "depth") { // texture-color with a depth mask
+        result = find_topN_matches_textureColor(target_image, filenames, data, N, output);
     }
-    else if (distance_metric == "multi-hist") {
-    result = find_topN_matches_multiHist(target_image, filenames, data, N, output);
-    }
-    else if (distance_metric == "texture-color") {
-    result = find_topN_matches_textureColor(target_image, filenames, data, N, output);
-    }
+
 
     // Step 7: verify the output
     if (result != 0) {
@@ -247,7 +252,7 @@ int main(int argc, char* argv[]) {
     }
 
     std::cout << "Output filenames: ";
-    for (const char* filename : output) {
+    for (const char *filename: output) {
         printf("%s ", filename);
     }
     std::cout << std::endl;
