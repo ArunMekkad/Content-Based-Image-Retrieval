@@ -311,12 +311,8 @@ int main(int argc, char *argv[]) {
     for (const char* filename : output) {
         if(distance_metric == "cosine")
         {
-            string dirname = "../olympus/";
-            size_t len = dirname.length() + strlen(filename) + 1;
-            char *fullpath = new char[len];
-            strcpy(fullpath, dirname.c_str());
-            strcat(fullpath, filename);
-            filename = fullpath;
+            std::string fullpath = "../olympus/" + std::string(filename);
+            output.push_back(strdup(fullpath.c_str()));  // Add the path to the image since only name is provided in ResNet18.csv
         }
         printf("%s ", filename);
     }
