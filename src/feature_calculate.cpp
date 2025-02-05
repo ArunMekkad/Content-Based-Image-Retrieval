@@ -240,14 +240,14 @@ void computeDepthMaskFromDA2(cv::Mat& src, cv::Mat& depth, cv::Mat& mask) {
 
     // Compute median depth (50th percentile)
     int median_index = depth_values.size() * 0.50;
-    ushort median_depth = depth_values[median_index];
-
-    // Define a depth range (50% close)
-    ushort min_depth = median_depth * 0.5;
-    ushort max_depth = median_depth * 1.5;
+    float median_value = depth_values[median_index];
+//    // Define a depth range (50% close)
+//    ushort min_depth = median_depth * 0.5;
+//    ushort max_depth = median_depth * 1.5;
 
     // Create a binary mask: Keep pixels where depth is within this range
-    mask = (depth >= min_depth) & (depth <= max_depth);
+//    mask = (depth >= min_depth) & (depth <= max_depth);
+    mask = (depth <= median_value);
 }
 int computeGradientMagnitude(cv::Mat& gray, cv::Mat& gradient_mag) {
     // Compute Sobel gradients using manual functions
