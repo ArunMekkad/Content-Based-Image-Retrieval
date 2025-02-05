@@ -170,7 +170,7 @@ int getMultiHistogramFeature(char *image_filename, std::vector<float> &image_dat
 
 // Function to compute texture feature using Sobel gradients and histogram
 
-int computeTextureFeature_arun(const cv::Mat& image, std::vector<float>& tex_hist, int bins) {
+int computeTextureFeature(const cv::Mat& image, std::vector<float>& tex_hist, int bins) {
     // Convert to grayscale
     cv::Mat gray;
     cv::cvtColor(image, gray, cv::COLOR_BGR2GRAY);
