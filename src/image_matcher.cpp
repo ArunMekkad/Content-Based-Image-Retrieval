@@ -190,7 +190,7 @@ int main(int argc, char *argv[]) {
     // Step 1: check for sufficient arguments
     if (argc < 5) {
         printf("usage: %s <target_image> <feature_file> <N> <distance_metric>\n", argv[0]);
-        printf("distance_metric options: ssd, rgb-hist, multi-hist, texture-color\n");
+        printf("distance_metric options: ssd, rgb-hist, multi-hist, texture-color, depth\n");
         exit(-1);
     }
 
@@ -213,8 +213,8 @@ int main(int argc, char *argv[]) {
     distance_metric = argv[4];
     // TODO: Add other metrics here
     if (distance_metric != "ssd" && distance_metric != "rgb-hist" && distance_metric != "multi-hist" &&
-        distance_metric != "texture-color" && distance_metric != "depth-dnn") {
-        printf("Invalid distance metric: %s. Must be 'ssd', 'intersection', 'multi-hist' or 'texture-color' or 'depth-dnn'.\n",
+        distance_metric != "texture-color" && distance_metric != "depth") {
+        printf("Invalid distance metric: %s. Must be 'ssd', 'intersection', 'multi-hist' or 'texture-color' or 'depth'.\n",
                argv[4]);
 
         printf("Using distance metric: %s\n", distance_metric.c_str());
