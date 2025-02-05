@@ -284,6 +284,7 @@ int main(int argc, char *argv[]) {
     }
     // Step 6: process and sort the feature
     std::vector<char *> output;
+    std::vector<char *> cosine_output;
     result = -1;
     // TODO: Add other metrics here
     if (distance_metric == "ssd") {
@@ -312,7 +313,7 @@ int main(int argc, char *argv[]) {
         if(distance_metric == "cosine")
         {
             std::string fullpath = "../olympus/" + std::string(filename);
-            output.push_back(strdup(fullpath.c_str()));  // Add the path to the image since only name is provided in ResNet18.csv
+            cosine_output.push_back(strdup(fullpath.c_str()));  // Add the path to the image since only name is provided in ResNet18.csv
         }
         printf("%s ", filename);
     }
@@ -324,6 +325,11 @@ int main(int argc, char *argv[]) {
         exit(-1);
     }
     cv::imshow("target", target);
+    if(distance_metric == "cosine")
+    {
+        displayGallery(cosine_output); //Display for cosine since different format for image directory
+    }
+    else
     displayGallery(output);
     return 0;
 }
