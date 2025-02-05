@@ -34,6 +34,11 @@ float calculate_histogramIntersection(std::vector<float>& hist1, std::vector<flo
 float calculate_cosine_distance(std::vector<float>& vec1, std::vector<float>& vec2);
 
 
+// Function to normalize a vector using L2 normalization (used in cosine distance)
+//  * @param vec Vector to normalize.
+// void l2_norm(std::vector<float>& vec);
+
+
 // Function to calculate distance between two concatenated histograms
 //  * @param hist1 First concatenated histogram.
 //  * @param hist2 Second concatenated histogram.

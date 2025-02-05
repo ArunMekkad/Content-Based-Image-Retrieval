@@ -30,6 +30,8 @@ using namespace std;
 int extract_and_save_features(char* image_filename,
                               int (*feature_function)(char *, std::vector<float> &),
                               char* output_filename) {
+
+    
     std::vector<float> features;
     // Try to extract features
     int result = feature_function(image_filename, features);
