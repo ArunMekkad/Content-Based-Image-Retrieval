@@ -87,6 +87,7 @@ float calculate_cosine_distance(std::vector<float>& vec1, std::vector<float>& ve
     // Cosine Distance = 1 - Cosine Similarity
     return 1.0f - cosineSimilarity;
 }
+
 // TODO: combine the two distance
 // float calculate_depthDNN_distance(std::vector<float>& vec1, std::vector<float>& vec2) {
 
@@ -118,13 +119,15 @@ float calculate_multiHist_distance(std::vector<float> &hist1, std::vector<float>
 //  * @return float Distance value.
 
 float calculate_textureColor_distance(std::vector<float>& hist1, std::vector<float>& hist2) {
-    // Split into color (first 512 elements) and texture (remaining)
-    size_t color_size = 8*8*8; // 512 elements for 8-bin RGB
-    std::vector<float> color1(hist1.begin(), hist1.begin()+color_size);
-    std::vector<float> color2(hist2.begin(), hist2.begin()+color_size);
+
+    // Dynamically determine split point (assuming equal weight for color and texture)
+    size_t split_index = hist1.size() / 2;
+
+    std::vector<float> color1(hist1.begin(), hist1.begin() + split_index);
+    std::vector<float> color2(hist2.begin(), hist2.begin() + split_index);
     
-    std::vector<float> tex1(hist1.begin()+color_size, hist1.end());
-    std::vector<float> tex2(hist2.begin()+color_size, hist2.end());
+    std::vector<float> tex1(hist1.begin() + split_index, hist1.end());
+    std::vector<float> tex2(hist2.begin() + split_index, hist2.end());
 
     // Compute individual distances
     float d_color = 1 - calculate_histogramIntersection(color1, color2);
@@ -132,5 +135,5 @@ float calculate_textureColor_distance(std::vector<float>& hist1, std::vector<flo
 
     // Combine with equal weights
     return 0.5f * d_color + 0.5f * d_tex;
-
 }
+

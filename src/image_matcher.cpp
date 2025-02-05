@@ -12,9 +12,31 @@
 #include <cstring>
 #include <vector>
 
-
 using namespace cv;
 using namespace std;
+
+int find_target_index_cosine(const char *target_image_filename, std::vector<char *> &filenames) 
+{  
+      
+    int target_index = -1;    
+    for (size_t i = 0; i < filenames.size(); i++) 
+    {        
+        string dirname = "../olympus/";
+        size_t len = dirname.length() + strlen(filenames[i]) + 1;
+        char *fullpath = new char[len];
+        strcpy(fullpath, dirname.c_str());
+        strcat(fullpath, filenames[i]);
+
+        if (strcmp(fullpath, target_image_filename) == 0)
+        {      
+            target_index = i;            
+        break;        
+        }    
+    }    
+        return target_index;
+}
+
+
 
 int find_target_index(const char *target_image_filename, vector<char *> &filenames) {
     int target_index = -1;
@@ -141,13 +163,11 @@ int find_topN_matches_multiHist(char *target_image_filename, std::vector<char *>
 /**
  * Function to find top N matches using texture color distance
  */
-int find_topN_matches_textureColor(char *target_image_filename, std::vector<char *> &filenames,
-                                   std::vector<std::vector<float>> &data, int N, std::vector<char *> &output) {
+int find_topN_matches_textureColor(char* target_image_filename, std::vector<char*>& filenames,
+                                   std::vector<std::vector<float>>& data, int N, std::vector<char*>& output) 
+{
     int target_index = find_target_index(target_image_filename, filenames);
-    if (target_index == -1) {
-        std::cerr << "Target image not found!" << std::endl;
-        return -1;
-    }
+    if (target_index == -1) return -1;
 
     std::vector<float> &target = data[target_index];
     std::vector<std::pair<float, int>> distances;
@@ -158,12 +178,48 @@ int find_topN_matches_textureColor(char *target_image_filename, std::vector<char
         distances.push_back({dist, static_cast<int>(i)});
     }
 
+    // Sort by ascending order
     std::sort(distances.begin(), distances.end());
+
+    // Clear output vector before inserting new values
+    output.clear();
     for (int i = 0; i < N && i < distances.size(); i++) {
         output.push_back(filenames[distances[i].second]);
     }
     return 0;
 }
+
+
+int find_topN_matches_cosine(char* target_image_filename, std::vector<char *> &filenames,
+                             std::vector<std::vector<float>> &data, int N,std::vector<char *> &output) 
+{
+    int target_index = find_target_index_cosine(target_image_filename, filenames);
+    if (target_index == -1) return -1;
+
+    std::vector<float> target = data[target_index];
+    // l2_norm(target);
+
+    std::vector<std::pair<float, int>> distances;
+
+    for(size_t i = 0; i < data.size(); i++) {
+        if(i == target_index) continue;
+        std::vector<float> vec = data[i];
+        // l2_norm(vec);
+        float dist = calculate_cosine_distance(vec, target);
+        distances.push_back({dist, static_cast<int>(i)});
+    }
+
+    std::sort(distances.begin(), distances.end());
+    
+    output.clear();
+    for(int i = 0; i < N && i < distances.size(); i++) {
+        output.push_back(filenames[distances[i].second]);
+    }
+
+    return 0;
+}
+
+
 
 /**
  * Main function that finds and displays the top N matching images based on feature vectors.
@@ -190,7 +246,7 @@ int main(int argc, char *argv[]) {
     // Step 1: check for sufficient arguments
     if (argc < 5) {
         printf("usage: %s <target_image> <feature_file> <N> <distance_metric>\n", argv[0]);
-        printf("distance_metric options: ssd, rgb-hist, multi-hist, texture-color, depth\n");
+        printf("distance_metric options: ssd, rgb-hist, multi-hist, texture-color, cosine, depth\n");
         exit(-1);
     }
 
@@ -212,13 +268,11 @@ int main(int argc, char *argv[]) {
     // Step 5: Get distance metric
     distance_metric = argv[4];
     // TODO: Add other metrics here
-    if (distance_metric != "ssd" && distance_metric != "rgb-hist" && distance_metric != "multi-hist" &&
-        distance_metric != "texture-color" && distance_metric != "depth") {
-        printf("Invalid distance metric: %s. Must be 'ssd', 'intersection', 'multi-hist' or 'texture-color' or 'depth'.\n",
-               argv[4]);
-
-        printf("Using distance metric: %s\n", distance_metric.c_str());
+    if (distance_metric != "ssd" && distance_metric != "rgb-hist" && distance_metric != "multi-hist" && distance_metric != "texture-color" && distance_metric != "cosine" && distance_metric != "depth") {  
+        printf("Invalid distance metric: %s. Must be 'ssd', 'intersection', 'multi-hist' , 'texture-color', 'cosine' or 'depth'.\n", argv[4]);
+        exit(-1);
     }
+    printf("Using distance metric: %s\n", distance_metric.c_str());
 
     std::vector<char *> filenames;
     std::vector<std::vector<float>> data;
@@ -243,7 +297,9 @@ int main(int argc, char *argv[]) {
     } else if (distance_metric == "depth") { // texture-color with a depth mask
         result = find_topN_matches_textureColor(target_image, filenames, data, N, output);
     }
-
+    else if (distance_metric == "cosine") {
+        result = find_topN_matches_cosine(target_image, filenames, data, N, output);
+    }
 
     // Step 7: verify the output
     if (result != 0) {
@@ -252,14 +308,23 @@ int main(int argc, char *argv[]) {
     }
 
     std::cout << "Output filenames: ";
-    for (const char *filename: output) {
+    for (const char* filename : output) {
+        if(distance_metric == "cosine")
+        {
+            string dirname = "../olympus/";
+            size_t len = dirname.length() + strlen(filename) + 1;
+            char *fullpath = new char[len];
+            strcpy(fullpath, dirname.c_str());
+            strcat(fullpath, filename);
+            filename = fullpath;
+        }
         printf("%s ", filename);
     }
     std::cout << std::endl;
     // Display target and result image
     cv::Mat target = cv::imread(target_image);
     if (target.empty()) {
-        printf("Target image empty!\n", argv[0]);
+        printf("Target image empty!\n");
         exit(-1);
     }
     cv::imshow("target", target);

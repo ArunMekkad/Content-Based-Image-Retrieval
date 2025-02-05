@@ -170,23 +170,34 @@ int getMultiHistogramFeature(char *image_filename, std::vector<float> &image_dat
 
 // Function to compute texture feature using Sobel gradients and histogram
 
-int computeTextureFeature(const cv::Mat& image, std::vector<float>& tex_hist, int bins) {
+int computeTextureFeature_arun(const cv::Mat& image, std::vector<float>& tex_hist, int bins) {
     // Convert to grayscale
     cv::Mat gray;
     cv::cvtColor(image, gray, cv::COLOR_BGR2GRAY);
 
-    // Compute Sobel gradients (single-channel)
+    // Compute Sobel gradients
     cv::Mat sobelX, sobelY;
-    sobelX3x3(gray, sobelX);  // Modify your SobelX/Y to handle 1-channel
+    sobelX3x3(gray, sobelX);
     sobelY3x3(gray, sobelY);
 
-    // Compute magnitude (single-channel)
-    cv::Mat gradient_mag(gray.size(), CV_32FC1);
-    for(int i=0; i<gray.rows; i++) {
-        for(int j=0; j<gray.cols; j++) {
-            float x = sobelX.at<short>(i,j);
-            float y = sobelY.at<short>(i,j);
-            gradient_mag.at<float>(i,j) = sqrt(x*x + y*y);
+    // Compute gradient magnitude
+    cv::Mat gradient_mag;
+    magnitude(sobelX, sobelY, gradient_mag);
+
+    // Normalize to [0,255] and convert to 8-bit
+    normalize(gradient_mag, gradient_mag, 0, 255, NORM_MINMAX);
+    gradient_mag.convertTo(gradient_mag, CV_8U);
+
+    // Initialize histogram
+    tex_hist.clear();
+    tex_hist.resize(bins, 0.0f);
+    int bin_size = 256 / bins;
+
+    // Compute histogram manually
+    for (int i = 0; i < gradient_mag.rows; i++) {
+        for (int j = 0; j < gradient_mag.cols; j++) {
+            int bin_idx = gradient_mag.at<uchar>(i, j) / bin_size;
+            tex_hist[bin_idx]++;
         }
     }
 
@@ -194,8 +205,15 @@ int computeTextureFeature(const cv::Mat& image, std::vector<float>& tex_hist, in
     cv::normalize(gradient_mag, gradient_mag, 0, 255, cv::NORM_MINMAX);
     gradient_mag.convertTo(gradient_mag, CV_8UC1);
 
+    // Normalize histogram
+    float total_pixels = static_cast<float>(gradient_mag.rows * gradient_mag.cols);
+    for (float& bin : tex_hist) {
+        bin /= total_pixels;
+    }
+
     return 0;
 }
+
 
 // Function to get texture-color feature by combining color and texture histograms
 
@@ -204,15 +222,14 @@ int getTextureColorFeature(char* image_filename, std::vector<float>& feature) {
 
     // Read image
     cv::Mat image = cv::imread(image_filename);
-    if(image.empty()) return -1;
+    if (image.empty()) return -1;
 
     // Get color histogram
     std::vector<float> color_hist;
     calculateRGBHistogram(image_filename, color_hist);
-
     // Get texture histogram
     std::vector<float> tex_hist;
-    computeTextureFeature(image, tex_hist, bins);
+    computeTextureFeature_arun(image, tex_hist, bins);
 
     // Concatenate features: color first, then texture
     feature.clear();
@@ -221,6 +238,7 @@ int getTextureColorFeature(char* image_filename, std::vector<float>& feature) {
 
     return 0;
 }
+
 
 
 
