@@ -218,7 +218,41 @@ int find_topN_matches_cosine(char* target_image_filename, std::vector<char *> &f
 
     return 0;
 }
+int find_topN_matches_depthDNN(char* target_image_filename, std::vector<char *> &filenames,
+                             std::vector<std::vector<float>> &data, std::vector<std::vector<float>> &rnnData , int N,std::vector<char *> &output) {
 
+    int target_index = find_target_index_cosine(target_image_filename, filenames);
+    if (target_index == -1) return -1;
+    if (rnnData.size() != data.size()) {
+        cerr << "RNN data and data size is not the same! \n";
+        cerr << "rnn size is" << rnnData.size() << " And data size is " << data.size();
+    }
+    std::vector<float> targetTexColor = data[target_index];
+    std::vector<float> targetRNN = rnnData[target_index];
+    // l2_norm(target);
+
+    std::vector<std::pair<float, int>> distances;
+
+    for(size_t i = 0; i < rnnData.size(); i++) {
+        if(i == target_index) continue;
+        std::vector<float> rnn = rnnData[i];
+        std::vector<float> vec = data[i];
+        // l2_norm(vec);
+        float dist1 = calculate_cosine_distance(rnn, targetRNN) * 0.8;
+        float dist2 = calculate_textureColor_distance(vec, targetTexColor) * 0.2;
+//        clog << "dist1-rnn is " << dist1 << ", dist2-texture-color is " << dist2 << endl;
+        distances.push_back({dist1 + dist2, static_cast<int>(i)});
+    }
+
+    std::sort(distances.begin(), distances.end());
+
+    output.clear();
+    for(int i = 0; i < N && i < distances.size(); i++) {
+        output.push_back(filenames[distances[i].second]);
+    }
+
+    return 0;
+}
 
 
 /**
@@ -296,7 +330,13 @@ int main(int argc, char *argv[]) {
     } else if (distance_metric == "texture-color") {
         result = find_topN_matches_textureColor(target_image, filenames, data, N, output);
     } else if (distance_metric == "depth") { // texture-color with a depth mask
-        result = find_topN_matches_textureColor(target_image, filenames, data, N, output);
+        std::vector<std::vector<float>> RNNdata;
+        result = read_image_data_csv("../olympus/ResNet18_olym.csv", filenames, RNNdata);
+        if (result != 0) {
+            cerr << "Can not read the RNN image csv file: %s\n";
+            exit(-1);
+        }
+        result = find_topN_matches_depthDNN(target_image, filenames, data, RNNdata,N, output);
     }
     else if (distance_metric == "cosine") {
         result = find_topN_matches_cosine(target_image, filenames, data, N, output);
@@ -310,7 +350,7 @@ int main(int argc, char *argv[]) {
 
     std::cout << "Output filenames: ";
     for (const char* filename : output) {
-        if(distance_metric == "cosine")
+        if(distance_metric == "cosine" || distance_metric == "depth")
         {
             std::string fullpath = "../olympus/" + std::string(filename);
             cosine_output.push_back(strdup(fullpath.c_str()));  // Add the path to the image since only name is provided in ResNet18.csv
@@ -325,7 +365,7 @@ int main(int argc, char *argv[]) {
         exit(-1);
     }
     cv::imshow("target", target);
-    if(distance_metric == "cosine")
+    if(distance_metric == "cosine" || distance_metric == "depth")
     {
         displayGallery(cosine_output); //Display for cosine since different format for image directory
     }
