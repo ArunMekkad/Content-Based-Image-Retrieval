@@ -229,7 +229,7 @@ int getTextureColorFeature(char* image_filename, std::vector<float>& feature) {
     calculateRGBHistogram(image_filename, color_hist);
     // Get texture histogram
     std::vector<float> tex_hist;
-    computeTextureFeature_arun(image, tex_hist, bins);
+    computeTextureFeature(image, tex_hist, bins);
 
     // Concatenate features: color first, then texture
     feature.clear();
@@ -257,7 +257,7 @@ void computeDepthMaskFromDA2(cv::Mat& src, cv::Mat& depth, cv::Mat& mask) {
     std::sort(depth_values.begin(), depth_values.end());
 
     // Compute median depth (50th percentile)
-    int median_index = depth_values.size() * 0.50;
+    int median_index = depth_values.size() * 0.65;
     float median_value = depth_values[median_index];
 //    // Define a depth range (50% close)
 //    ushort min_depth = median_depth * 0.5;
@@ -322,28 +322,66 @@ int calculateRGBHistogram(const cv::Mat& image, const cv::Mat& mask, std::vector
 
 // Overloading Function to compute texture histogram with depth filtering
 int computeTextureFeature(cv::Mat& image, cv::Mat& mask, std::vector<float>& tex_hist, int bins) {
-    // Convert to grayscale
+    // // Convert to grayscale
+    // cv::Mat gray;
+    // cv::cvtColor(image, gray, cv::COLOR_BGR2GRAY);
+
+    // // Compute gradient magnitude
+    // cv::Mat gradient_mag;
+    // computeGradientMagnitude(gray, gradient_mag);
+     // Convert to grayscale
+   
+    // // Initialize histogram
+    // tex_hist.assign(bins, 0.0f);
+    // int valid_pixel_count = 0;
+
+    // // Compute histogram using optimized iteration
+    // for (int i = 0; i < gray.rows; i++) {
+    //     for (int j = 0; j < gray.cols; j++) {
+    //         if (mask.at<uchar>(i, j) == 0) continue; // Ignore pixels outside depth threshold
+
+    //         int bin_idx = static_cast<int>(gradient_mag.at<float>(i, j) * (bins - 1));
+    //         tex_hist[bin_idx]++;
+    //         valid_pixel_count++;
+    //     }
+    // }
+
+
+
+      // Convert to grayscale
     cv::Mat gray;
     cv::cvtColor(image, gray, cv::COLOR_BGR2GRAY);
 
+    // Compute Sobel gradients
+    cv::Mat sobelX, sobelY;
+    sobelX3x3(gray, sobelX);
+    sobelY3x3(gray, sobelY);
+
     // Compute gradient magnitude
     cv::Mat gradient_mag;
-    computeGradientMagnitude(gray, gradient_mag);
+    magnitude(sobelX, sobelY, gradient_mag);
+
+    // Normalize to [0,255] and convert to 8-bit
+    normalize(gradient_mag, gradient_mag, 0, 255, NORM_MINMAX);
+    gradient_mag.convertTo(gradient_mag, CV_8U);
 
     // Initialize histogram
-    tex_hist.assign(bins, 0.0f);
+    tex_hist.clear();
+    tex_hist.resize(bins, 0.0f);
+    int bin_size = 256 / bins;
     int valid_pixel_count = 0;
 
-    // Compute histogram using optimized iteration
-    for (int i = 0; i < gray.rows; i++) {
-        for (int j = 0; j < gray.cols; j++) {
-            if (mask.at<uchar>(i, j) == 0) continue; // Ignore pixels outside depth threshold
-
-            int bin_idx = static_cast<int>(gradient_mag.at<float>(i, j) * (bins - 1));
+    // Compute histogram manually
+    for (int i = 0; i < gradient_mag.rows; i++) {
+        for (int j = 0; j < gradient_mag.cols; j++) {
+            if (mask.at<uchar>(i, j) == 0) continue;
+            int bin_idx = gradient_mag.at<uchar>(i, j) / bin_size;
             tex_hist[bin_idx]++;
             valid_pixel_count++;
         }
     }
+
+
     // Normalize histogram
     if (valid_pixel_count > 0) {
         for (float &val : tex_hist) val /= valid_pixel_count;
