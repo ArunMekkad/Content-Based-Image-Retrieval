@@ -20,6 +20,7 @@ enum class FeatureType {
     TEXTURE_COLOR,
     DEPTH,
     BANANA,
+    FACE
 };
 
 // Helper function to get feature function based on type
@@ -58,5 +59,7 @@ int getTextureColorFeatureWithDepth(char* image_filename, std::vector<float>& fe
 // Compute spatial variance of yellow regions
 int getBananaFeature(char *image_filename, std::vector<float>& feature);
 
+
+int getTextureColorFeatureWithFaceMask(char* image_filename, std::vector<float>& feature);
 
 #endif //PROJ2_FEATURE_CALCULATE_H

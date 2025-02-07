@@ -8,6 +8,7 @@
 #include "../include/filters.h"
 #include "../include/DA2Network.hpp"
 #include <opencv2/opencv.hpp>
+#include "../include/faceDetect.h"
 
 using namespace cv;
 using namespace std;
@@ -27,6 +28,8 @@ FeatureFunction getFeatureFunction(FeatureType type) {
             return getTextureColorFeatureWithDepth;
         case FeatureType::BANANA:
             return getBananaFeature;
+        case FeatureType::FACE:
+            return getTextureColorFeatureWithFaceMask;
         default:
             return nullptr;
     }
@@ -114,7 +117,7 @@ int calculateRGBHistogram(char *image_filename, std::vector<float>& hist) {
 // Function to calculate multi-histogram by splitting the image into two 
 // halves, calculating histograms for each half and concatenating them
 
-int calculateMultiHistogram(const cv::Mat& image, std::vector<float>& hist, int bins) {
+int computeMultiHistogram(const cv::Mat& image, std::vector<float>& hist, int bins) {
     const int BIN_SIZE = 256 / bins;
     
     // Initialize the histogram
@@ -159,8 +162,8 @@ int getMultiHistogramFeature(char *image_filename, std::vector<float> &image_dat
 
     // Calculate histograms for each region
     std::vector<float> top_hist, bottom_hist;
-    calculateMultiHistogram(top_half, top_hist, bins);
-    calculateMultiHistogram(bottom_half, bottom_hist, bins);
+    computeMultiHistogram(top_half, top_hist, bins);
+    computeMultiHistogram(bottom_half, bottom_hist, bins);
 
     // Concatenate histograms
     image_data.clear();
@@ -202,10 +205,6 @@ int computeTextureFeature(const cv::Mat& image, std::vector<float>& tex_hist, in
             tex_hist[bin_idx]++;
         }
     }
-
-    // Normalize to [0,255] and convert to 8UC1
-    cv::normalize(gradient_mag, gradient_mag, 0, 255, cv::NORM_MINMAX);
-    gradient_mag.convertTo(gradient_mag, CV_8UC1);
 
     // Normalize histogram
     float total_pixels = static_cast<float>(gradient_mag.rows * gradient_mag.cols);
@@ -259,7 +258,7 @@ void computeDepthMaskFromDA2(cv::Mat& src, cv::Mat& depth, cv::Mat& mask) {
     std::sort(depth_values.begin(), depth_values.end());
 
     // Compute median depth (50th percentile)
-    int median_index = depth_values.size() * 0.50;
+    int median_index = depth_values.size() * 0.65;
     float median_value = depth_values[median_index];
 //    // Define a depth range (50% close)
 //    ushort min_depth = median_depth * 0.5;
@@ -322,30 +321,42 @@ int calculateRGBHistogram(const cv::Mat& image, const cv::Mat& mask, std::vector
     return 0;
 }
 
-// Overloading Function to compute texture histogram with depth filtering
 int computeTextureFeature(cv::Mat& image, cv::Mat& mask, std::vector<float>& tex_hist, int bins) {
+    
     // Convert to grayscale
     cv::Mat gray;
     cv::cvtColor(image, gray, cv::COLOR_BGR2GRAY);
 
+    // Compute Sobel gradients
+    cv::Mat sobelX, sobelY;
+    sobelX3x3(gray, sobelX);
+    sobelY3x3(gray, sobelY);
+
     // Compute gradient magnitude
     cv::Mat gradient_mag;
-    computeGradientMagnitude(gray, gradient_mag);
+    magnitude(sobelX, sobelY, gradient_mag);
+
+    // Normalize to [0,255] and convert to 8-bit
+    normalize(gradient_mag, gradient_mag, 0, 255, NORM_MINMAX);
+    gradient_mag.convertTo(gradient_mag, CV_8U);
 
     // Initialize histogram
-    tex_hist.assign(bins, 0.0f);
+    tex_hist.clear();
+    tex_hist.resize(bins, 0.0f);
+    int bin_size = 256 / bins;
     int valid_pixel_count = 0;
 
-    // Compute histogram using optimized iteration
-    for (int i = 0; i < gray.rows; i++) {
-        for (int j = 0; j < gray.cols; j++) {
-            if (mask.at<uchar>(i, j) == 0) continue; // Ignore pixels outside depth threshold
-
-            int bin_idx = static_cast<int>(gradient_mag.at<float>(i, j) * (bins - 1));
+    // Compute histogram manually
+    for (int i = 0; i < gradient_mag.rows; i++) {
+        for (int j = 0; j < gradient_mag.cols; j++) {
+            if (mask.at<uchar>(i, j) == 0) continue;
+            int bin_idx = gradient_mag.at<uchar>(i, j) / bin_size;
             tex_hist[bin_idx]++;
             valid_pixel_count++;
         }
     }
+
+
     // Normalize histogram
     if (valid_pixel_count > 0) {
         for (float &val : tex_hist) val /= valid_pixel_count;
@@ -354,6 +365,7 @@ int computeTextureFeature(cv::Mat& image, cv::Mat& mask, std::vector<float>& tex
     return 0;
 }
 //Texture color with a mask based on depth closeness (50% range around median)
+
 int getTextureColorFeatureWithDepth(char* image_filename, std::vector<float>& feature) {
     // Load RGB image
     cv::Mat image = cv::imread(image_filename);
@@ -447,6 +459,35 @@ int getBananaFeature(char *image_filename, std::vector<float>& hist) {
         }
     }
     hist.push_back(total);
-    clog << "The valid total blobs are " << total << endl;
+//     clog << "The valid total blobs are " << total << endl;
+}
+//Texture color with a mask based on face detection
+
+int getTextureColorFeatureWithFaceMask(char* image_filename, std::vector<float>& feature) {
+    cv::Mat image = cv::imread(image_filename);
+    if (image.empty()) return -1;
+
+    std::vector<cv::Rect> faces;
+    cv::Mat grey;
+    cv::cvtColor(image, grey, cv::COLOR_BGR2GRAY);
+    detectFaces(grey, faces); //Face detection
+    
+    // Create face mask
+    cv::Mat mask = cv::Mat::zeros(image.size(), CV_8U);
+    for(const auto& face : faces) {
+        cv::rectangle(mask, face, cv::Scalar(255), cv::FILLED);
+    }
+
+    // Extract features only from face regions
+    std::vector<float> color_hist, tex_hist;
+    calculateRGBHistogram(image, mask, color_hist, 8); // 8 bins for color histogram
+    computeTextureFeature(image, mask, tex_hist, 16); // 16 bins for texture histogram
+
+    // Add face detection flag (1=present, 0=absent)
+    feature.clear();
+    feature.push_back(faces.empty() ? 0.0f : 1.0f);
+    feature.insert(feature.end(), color_hist.begin(), color_hist.end());
+    feature.insert(feature.end(), tex_hist.begin(), tex_hist.end());
+  
     return 0;
 }

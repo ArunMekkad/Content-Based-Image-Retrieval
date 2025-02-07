@@ -8,7 +8,7 @@
 
 ## Environment
 - **Yuyang Tian**: macOS 10.13.1 + CLion + CMake
-- **Arun**: (Ubuntu 22.04 LTS + VS Code + CMake)
+- **Arun Mekkad**: Ubuntu 22.04 LTS + VS Code + CMake
 
 ## Instructions for Running Executables
 
@@ -38,6 +38,8 @@
   # 4. Texture-color: 4
   # 5. RNN feature: 5
   # 7. Depth from DA2: 7
+  # 8. Face detection: 8
+
   ```
 - **Example**:
   ```bash
@@ -60,7 +62,8 @@
   # Extension1 - banana detection
   ../olympus/ ../data/feature_vector_9.csv 9
   
-  
+  # Extension 2 - face detection
+  ../olympus/ ../data/feature_vector_face.csv 8
 
 #### **Proj2-TopN_finding**
 
@@ -73,9 +76,10 @@
   # 2. RGB histogram: rgb-hist
   # 3. Multi histogram: multi-hist
   # 4. Texture-color: texture-color
-  # 7. Texture-color with Depth mask: depth && RNN
+  # 5. Deep Network Embedding : cosine
+  # 7. Texture-color with Depth mask: depth
+  # 8. Face detection: face
   # 9. Banana
-  # 10. Gabor response
   ```
 - **Example**:
   ```bash
@@ -95,11 +99,13 @@
   ../olympus/pic.0535.jpg ../data/feature_vector_4.csv 4 texture-color
   
   # Task5
-  ../olympus/pic.0281.jpg ../olympus/ResNet18_olym.csv 5 cosine
+  ../olympus/pic.0893.jpg ../include/ResNet18.csv 5 cosine
   
   # Task7
   ../olympus/pic.0281.jpg ../data/feature_vector_7.csv 5 depth
   
   # Extension1 - banana detection
   ../olympus/pic.0344.jpg ../data/feature_vector_9.csv 5 banana
- 
+  
+  # Extension2 - face detection
+  ../olympus/pic.0318.jpg ../data/feature_vector_face.csv 3 face

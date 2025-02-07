@@ -81,9 +81,9 @@ int main(int argc, char *argv[]) {
         printf("2: RGB histogram\n");
         printf("3: Multi histogram\n");
         printf("4: Texture color\n");
+        printf("8: Face value from DA2\n");
         printf("7: Depth value from DA2\n");
         printf("9: Banana\n");
-        // TODO: add more features here
         exit(-1);
     }
 
@@ -109,6 +109,9 @@ int main(int argc, char *argv[]) {
             feature_type = FeatureType::DEPTH;
             printf("Using Depth vector feature\n");
             break;
+        case 8:
+            feature_type = FeatureType::FACE;
+            printf("Using Face vector feature\n");
         case 9:
             feature_type = FeatureType::BANANA;
             printf("Using Banana feature\n");

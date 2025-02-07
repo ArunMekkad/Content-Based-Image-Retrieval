@@ -62,7 +62,7 @@ float calculate_histogramIntersection(std::vector<float>& hist1, std::vector<flo
 float calculate_cosine_distance(std::vector<float>& vec1, std::vector<float>& vec2) {
     // Check if vectors are valid (same size and non-empty)
     if (vec1.size() != vec2.size() || vec1.empty()) {
-        return 1.0f;  // Return maximum distance (completely dissimilar) if invalid
+        return 1.0f;  // Return maximum distance if vectors are invalid
     }
 
     float dotProduct = 0.0f; // Sum of element-wise multiplication
@@ -88,6 +88,10 @@ float calculate_cosine_distance(std::vector<float>& vec1, std::vector<float>& ve
     return 1.0f - cosineSimilarity;
 }
 
+// Function to calculate distance between two concatenated histograms
+//  * @param hist1 First concatenated histogram.
+//  * @param hist2 Second concatenated histogram.
+//  * @return float Distance value.
 
 float calculate_multiHist_distance(std::vector<float> &hist1, std::vector<float> &hist2) {
     // Split concatenated histograms
@@ -112,7 +116,7 @@ float calculate_multiHist_distance(std::vector<float> &hist1, std::vector<float>
 
 float calculate_textureColor_distance(std::vector<float>& hist1, std::vector<float>& hist2) {
 
-    // Dynamically determine split point (assuming equal weight for color and texture)
+    //Determine split point
     size_t split_index = hist1.size() / 2;
 
     std::vector<float> color1(hist1.begin(), hist1.begin() + split_index);
