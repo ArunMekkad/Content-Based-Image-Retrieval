@@ -36,6 +36,7 @@
   # 2. RGB histogram: 2
   # 3. Multi histogram: 3
   # 4. Texture-color: 4
+  # 5. RNN feature: 5
   # 7. Depth from DA2: 7
   ```
 - **Example**:
@@ -53,7 +54,13 @@
   ../olympus/ ../data/feature_vector_4.csv 4
   
   # Task7
-  ../olympus-test/ ../data/feature_vector_7.csv 7
+  # Reminder: it takes relatively long time to compute these feature vectors, please feel free to use existed 'feature_vector_7.csv' for testing 
+  ../olympus/ ../data/feature_vector_7.csv 7
+  
+  # Extension1 - banana detection
+  ../olympus/ ../data/feature_vector_9.csv 9
+  
+  
 
 #### **Proj2-TopN_finding**
 
@@ -66,7 +73,9 @@
   # 2. RGB histogram: rgb-hist
   # 3. Multi histogram: multi-hist
   # 4. Texture-color: texture-color
-  # 7. Texture-color with Depth mask: depth
+  # 7. Texture-color with Depth mask: depth && RNN
+  # 9. Banana
+  # 10. Gabor response
   ```
 - **Example**:
   ```bash
@@ -85,7 +94,12 @@
   # Task4
   ../olympus/pic.0535.jpg ../data/feature_vector_4.csv 4 texture-color
   
+  # Task5
+  ../olympus/pic.0281.jpg ../olympus/ResNet18_olym.csv 5 cosine
+  
   # Task7
-  ../olympus-test/pic.0281.jpg ../data/feature_vector_7.csv 5 depth
-
+  ../olympus/pic.0281.jpg ../data/feature_vector_7.csv 5 depth
+  
+  # Extension1 - banana detection
+  ../olympus/pic.0344.jpg ../data/feature_vector_9.csv 5 banana
  
