@@ -26,6 +26,8 @@ FeatureFunction getFeatureFunction(FeatureType type) {
             return getTextureColorFeature;
         case FeatureType::DEPTH:
             return getTextureColorFeatureWithDepth;
+        case FeatureType::BANANA:
+            return getBananaFeature;
         case FeatureType::FACE:
             return getTextureColorFeatureWithFaceMask;
         default:
@@ -389,6 +391,76 @@ int getTextureColorFeatureWithDepth(char* image_filename, std::vector<float>& fe
     return 0;
 }
 
+int getBananaFeature(char *image_filename, std::vector<float>& hist) {
+    // Read and process image as before
+    cv::Mat image = cv::imread(image_filename);
+    if (image.empty()) {
+        std::cerr << "Error loading image: " << image_filename << std::endl;
+        return -1;
+    }
+
+    // HSV conversion and mask creation
+    cv::Mat hsv, mask;
+    cv::cvtColor(image, hsv, cv::COLOR_BGR2HSV);
+    cv::Scalar lower_yellow(22, 150, 150);
+    cv::Scalar upper_yellow(28, 255, 255);
+    cv::inRange(hsv, lower_yellow, upper_yellow, mask);
+
+    // Find connected components
+    cv::Mat labels, stats, centroids;
+    const int MIN_AREA = 2000;
+    const int MAX_AREA = 10000;
+    int nComponents = cv::connectedComponentsWithStats(mask, labels, stats, centroids);
+
+    // Create 3D histogram: x-position (4 bins) × y-position (4 bins) × size (4 bins)
+    const int SPATIAL_BINS = 4;  // bins for each spatial dimension
+    const int SIZE_BINS = 4;     // bins for blob sizes
+    const int TOTAL_BINS = SPATIAL_BINS * SPATIAL_BINS * SIZE_BINS;
+    hist.assign(TOTAL_BINS, 0);
+
+    float size_bin_width = (MAX_AREA - MIN_AREA) / static_cast<float>(SIZE_BINS);
+    float x_bin_width = static_cast<float>(image.cols) / SPATIAL_BINS;
+    float y_bin_width = static_cast<float>(image.rows) / SPATIAL_BINS;
+
+
+    // Process each blob
+    for (int i = 1; i < nComponents; i++) {
+        int area = stats.at<int>(i, cv::CC_STAT_AREA);
+        if (area >= MIN_AREA && area <= MAX_AREA) {
+            // Get size bin
+            int size_bin = std::min(static_cast<int>((area - MIN_AREA) / size_bin_width), SIZE_BINS - 1);
+
+            // Scan through the entire image to find pixels belonging to this blob
+            for (int y = 0; y < labels.rows; y++) {
+                for (int x = 0; x < labels.cols; x++) {
+                    // Check if this pixel belongs to the current blob
+                    if (labels.at<int>(y, x) == i) {
+                        // Calculate spatial bins for this pixel
+                        int x_bin = std::min(static_cast<int>(x / x_bin_width), SPATIAL_BINS - 1);
+                        int y_bin = std::min(static_cast<int>(y / y_bin_width), SPATIAL_BINS - 1);
+
+                        // Calculate flat index
+                        int flat_idx = x_bin + y_bin * SPATIAL_BINS + size_bin * SPATIAL_BINS * SPATIAL_BINS;
+                        hist[flat_idx] += 1.0f;
+                    }
+                }
+            }
+        }
+    }
+    // Normalize histogram
+    float total = 0;
+    for (float count : hist) {
+        total += count;
+    }
+    // Normalize histogram
+    if (total > 0) {
+        for (float& count : hist) {
+            count /= total;
+        }
+    }
+    hist.push_back(total);
+//     clog << "The valid total blobs are " << total << endl;
+}
 //Texture color with a mask based on face detection
 
 int getTextureColorFeatureWithFaceMask(char* image_filename, std::vector<float>& feature) {
@@ -416,6 +488,6 @@ int getTextureColorFeatureWithFaceMask(char* image_filename, std::vector<float>&
     feature.push_back(faces.empty() ? 0.0f : 1.0f);
     feature.insert(feature.end(), color_hist.begin(), color_hist.end());
     feature.insert(feature.end(), tex_hist.begin(), tex_hist.end());
-
+  
     return 0;
 }

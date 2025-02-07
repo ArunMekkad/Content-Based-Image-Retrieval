@@ -19,6 +19,7 @@ enum class FeatureType {
     MULTI_HISTOGRAM,
     TEXTURE_COLOR,
     DEPTH,
+    BANANA,
     FACE
 };
 
@@ -55,6 +56,9 @@ int getTextureColorFeature(char* image_filename, std::vector<float>& feature);
 // Function to extract combined RGB and texture features using DA2 depth map
 // Compute mask based on depth closeness (50% range around median)
 int getTextureColorFeatureWithDepth(char* image_filename, std::vector<float>& feature);
+// Compute spatial variance of yellow regions
+int getBananaFeature(char *image_filename, std::vector<float>& feature);
+
 
 int getTextureColorFeatureWithFaceMask(char* image_filename, std::vector<float>& feature);
 

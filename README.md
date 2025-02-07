@@ -36,8 +36,10 @@
   # 2. RGB histogram: 2
   # 3. Multi histogram: 3
   # 4. Texture-color: 4
+  # 5. RNN feature: 5
   # 7. Depth from DA2: 7
   # 8. Face detection: 8
+  # 9. Banana detection: 9
 
   ```
 - **Example**:
@@ -55,9 +57,13 @@
   ../olympus/ ../data/feature_vector_4.csv 4
   
   # Task7
+  # Reminder: it takes relatively long time to compute these feature vectors, please feel free to use existed 'feature_vector_7.csv' for testing 
   ../olympus/ ../data/feature_vector_7.csv 7
   
-  # Extension
+  # Extension1 - banana detection
+  ../olympus/ ../data/feature_vector_9.csv 9
+  
+  # Extension 2 - face detection
   ../olympus/ ../data/feature_vector_face.csv 8
 
 #### **Proj2-TopN_finding**
@@ -74,6 +80,7 @@
   # 5. Deep Network Embedding : cosine
   # 7. Texture-color with Depth mask: depth
   # 8. Face detection: face
+  # 9. Banana
   ```
 - **Example**:
   ```bash
@@ -91,14 +98,15 @@
   
   # Task4
   ../olympus/pic.0535.jpg ../data/feature_vector_4.csv 4 texture-color
-
+  
   # Task5
   ../olympus/pic.0893.jpg ../include/ResNet18.csv 5 cosine
-
+  
   # Task7
   ../olympus/pic.0281.jpg ../data/feature_vector_7.csv 5 depth
   
-  # Extension
+  # Extension1 - banana detection
+  ../olympus/pic.0344.jpg ../data/feature_vector_9.csv 5 banana
+  
+  # Extension2 - face detection
   ../olympus/pic.0318.jpg ../data/feature_vector_face.csv 3 face
-
- 
