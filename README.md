@@ -8,7 +8,7 @@
 
 ## Environment
 - **Yuyang Tian**: macOS 10.13.1 + CLion + CMake
-- **Arun**: (Ubuntu 22.04 LTS + VS Code + CMake)
+- **Arun Mekkad**: Ubuntu 22.04 LTS + VS Code + CMake
 
 ## Instructions for Running Executables
 
@@ -37,6 +37,8 @@
   # 3. Multi histogram: 3
   # 4. Texture-color: 4
   # 7. Depth from DA2: 7
+  # 8. Face detection: 8
+
   ```
 - **Example**:
   ```bash
@@ -53,7 +55,10 @@
   ../olympus/ ../data/feature_vector_4.csv 4
   
   # Task7
-  ../olympus-test/ ../data/feature_vector_7.csv 7
+  ../olympus/ ../data/feature_vector_7.csv 7
+  
+  # Extension
+  ../olympus/ ../data/feature_vector_face.csv 8
 
 #### **Proj2-TopN_finding**
 
@@ -66,7 +71,9 @@
   # 2. RGB histogram: rgb-hist
   # 3. Multi histogram: multi-hist
   # 4. Texture-color: texture-color
+  # 5. Deep Network Embedding : cosine
   # 7. Texture-color with Depth mask: depth
+  # 8. Face detection: face
   ```
 - **Example**:
   ```bash
@@ -84,8 +91,14 @@
   
   # Task4
   ../olympus/pic.0535.jpg ../data/feature_vector_4.csv 4 texture-color
-  
+
+  # Task5
+  ../olympus/pic.0893.jpg ../include/ResNet18.csv 5 cosine
+
   # Task7
-  ../olympus-test/pic.0281.jpg ../data/feature_vector_7.csv 5 depth
+  ../olympus/pic.0281.jpg ../data/feature_vector_7.csv 5 depth
+  
+  # Extension
+  ../olympus/pic.0318.jpg ../data/feature_vector_face.csv 3 face
 
  

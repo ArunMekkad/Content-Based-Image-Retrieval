@@ -19,6 +19,7 @@ enum class FeatureType {
     MULTI_HISTOGRAM,
     TEXTURE_COLOR,
     DEPTH,
+    FACE
 };
 
 // Helper function to get feature function based on type
@@ -54,5 +55,7 @@ int getTextureColorFeature(char* image_filename, std::vector<float>& feature);
 // Function to extract combined RGB and texture features using DA2 depth map
 // Compute mask based on depth closeness (50% range around median)
 int getTextureColorFeatureWithDepth(char* image_filename, std::vector<float>& feature);
+
+int getTextureColorFeatureWithFaceMask(char* image_filename, std::vector<float>& feature);
 
 #endif //PROJ2_FEATURE_CALCULATE_H
