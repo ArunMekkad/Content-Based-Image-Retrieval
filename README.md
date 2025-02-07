@@ -39,6 +39,7 @@
   # 5. RNN feature: 5
   # 7. Depth from DA2: 7
   # 8. Face detection: 8
+  # 9. Banana detection: 9
 
   ```
 - **Example**:
