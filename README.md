@@ -1,4 +1,4 @@
-# Project 2
+# Content Based Image Retrieval
 
 ## Project: [Report Link](https://docs.google.com/document/d/1GSQYxn4meG6uxprJJ3AXL2RdfmDbJhp-DzZt_QJ7Cxk/edit?addon_store&tab=t.0#heading=h.1ikululub2bq)
 
